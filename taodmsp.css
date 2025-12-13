@@ -1,0 +1,207 @@
+/* Thiết lập chung */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f9;
+    padding: 20px;
+}
+
+.khung-chua-toan-trang {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Khối Form (Nội dung chính) */
+.noi-dung-chinh-form {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Đổ bóng nhẹ và đẹp hơn */
+    padding: 30px;
+}
+
+/* --- 1. Header và Tiêu đề --- */
+.dau-trang-form {
+    margin-bottom: 25px;
+}
+
+.khung-tieu-de-chinh {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nut-quay-lai {
+    text-decoration: none;
+    color: #555;
+    font-size: 24px;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nut-quay-lai:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.tieu-de-lon {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #333;
+}
+
+.duong-dan {
+    color: #999;
+    margin-left: 50px; /* Căn chỉnh với tiêu đề */
+}
+
+/* --- 2. Khối Nhập liệu (Section) --- */
+.khung-nhap-lieu {
+    padding: 0;
+}
+
+.tieu-de-khung {
+    border-bottom: 2px solid #007bff; /* Gạch chân màu xanh */
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    color: #007bff;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* --- 3. Các Trường nhập liệu --- */
+.nhom-truong.hai-cot {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.truong-nhap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+}
+
+input[type="text"], textarea, select {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Bo tròn nhẹ */
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Hiệu ứng focus nổi bật */
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.chu-thich {
+    color: #999;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* --- 4. Switch Kích hoạt --- */
+.vung-switch {
+    margin-top: 20px;
+}
+
+.nhom-switch {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Thiết lập cho công tắc chuyển đổi (Switch Toggle) */
+input[type="checkbox"] {
+    position: relative;
+    width: 48px;
+    height: 28px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ccc;
+    outline: none;
+    border-radius: 20px;
+    transition: .3s;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+    background: #007bff;
+}
+
+input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    top: 4px;
+    left: 4px;
+    background: white;
+    transition: .3s;
+}
+
+input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+/* --- 5. Nút Hành động Footer --- */
+.vung-nut-hanh-dong {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 30px;
+    gap: 15px;
+    border-top: 1px solid #eee;
+    margin-top: 30px;
+}
+
+.nut {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.nut-chinh {
+    background-color: #007bff; 
+    color: white;
+}
+
+.nut-tao-tiep {
+    background-color: #2ecc71; /* Xanh lá */
+    color: white;
+}
+
+.nut-phu {
+    background-color: #f0f0f0;
+    color: #444;
+    border: 1px solid #ccc;
+}
+
+.nut-chinh:hover {
+    background-color: #0056b3;
+}
+
+.nut-tao-tiep:hover {
+    background-color: #27ae60;
+}
+
+.nut-phu:hover {
+    background-color: #e9ecef;
+}
