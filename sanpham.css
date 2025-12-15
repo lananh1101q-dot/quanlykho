@@ -75,10 +75,13 @@ body {
     background-color: #f9f9f9;
 }
 .chia2cot{
-    display: flex;
+    display: flex; /* Sử dụng flexbox để tạo hai cột */
     gap: 30px;
     margin-bottom: 20px;
      align-items: center;
+}
+.cot{
+    flex: 1; /* Mỗi cột chiếm một nửa không gian */
 }
 
 .input-tim-kiem {

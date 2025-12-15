@@ -89,19 +89,19 @@ if (isset($_POST['btnluu'])) {
                              <div class="khung-input-nhom">
                                 <select id="Madm" name="Madm">
                                     <option value="">Chọn một tùy chọn</option>
-                                    <?php
-        // Kiểm tra xem có dữ liệu trả về không
-        if (mysqli_num_rows($result_danhmuc) > 0) {
-            // Lặp qua từng dòng dữ liệu để tạo thẻ <option>
-            while ($row = mysqli_fetch_assoc($result_danhmuc)) {
-                // Giá trị (value) là Madm (Mã danh mục)
-                // Hiển thị cho người dùng là Tendm (Tên danh mục)
-                echo '<option value="'  . $row['Tendm'] . '</option>';
-            }
-        } else {
-             echo '<option value="" disabled>Chưa có danh mục nào</option>';
-        }
-        ?>
+                                     <?php
+                                    // Kiểm tra xem có dữ liệu trả về không
+                                    if (mysqli_num_rows($result_danhmuc) > 0) {
+                                        // Lặp qua từng dòng dữ liệu để tạo thẻ <option>
+                                        while ($row = mysqli_fetch_assoc($result_danhmuc)) {
+                                            // Giá trị (value) là Madm (Mã danh mục)
+                                            // Hiển thị cho người dùng là Tendm (Tên danh mục)
+                                            echo '<option value="'  . $row['Tendm'] . '</option>';
+                                        }
+                                    } else {
+                                        echo '<option value="" disabled>Chưa có danh mục nào</option>';
+                                    }
+                                    ?>
                                 </select>
                                 <button type="button" class="nut-them" id="nut-them-dm">+</button>
                             </div>
