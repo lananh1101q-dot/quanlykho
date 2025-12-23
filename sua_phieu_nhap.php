@@ -8,14 +8,38 @@ require_once __DIR__ . '/db.php';
 
 $errors = [];
 $success = '';
+$manhap = $_GET['id'] ?? '';
+
+if (empty($manhap)) {
+    header('Location: danh_sach_phieu_nhap.php');
+    exit;
+}
 
 // Lấy dữ liệu dropdown
 $nhacungcaps = $pdo->query("SELECT Mancc, Tenncc FROM Nhacungcap ORDER BY Tenncc")->fetchAll();
 $sanphams = $pdo->query("SELECT Masp, Tensp, Dvt FROM Sanpham ORDER BY Tensp")->fetchAll();
 $khos = $pdo->query("SELECT Makho, Tenkho FROM Kho ORDER BY Tenkho")->fetchAll();
 
+// Lấy thông tin phiếu nhập hiện tại
+$phieuNhap = $pdo->prepare("SELECT * FROM Phieunhap WHERE Manhaphang = ?");
+$phieuNhap->execute([$manhap]);
+$phieuNhap = $phieuNhap->fetch();
+
+if (!$phieuNhap) {
+    header('Location: danh_sach_phieu_nhap.php?error=Phiếu nhập không tồn tại');
+    exit;
+}
+
+// Lấy chi tiết phiếu nhập hiện tại
+$chiTietCu = $pdo->prepare("SELECT * FROM Chitiet_Phieunhap WHERE Manhaphang = ?");
+$chiTietCu->execute([$manhap]);
+$chiTietCu = $chiTietCu->fetchAll();
+
+// Lấy Makho từ phiếu nhập
+$makhoCu = $phieuNhap['Makho'] ?? '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $manhap = trim($_POST['manhaphang'] ?? '');
+    $manhapNew = trim($_POST['manhaphang'] ?? '');
     $mancc = trim($_POST['mancc'] ?? '');
     $makho = trim($_POST['makho'] ?? '');
     $ngaynhap = $_POST['ngaynhap'] ?? '';
@@ -24,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $soluongArr = $_POST['soluong'] ?? [];
     $dongiaArr = $_POST['dongia'] ?? [];
 
-    if ($manhap === '' || $mancc === '' || $makho === '' || $ngaynhap === '') {
+    if ($manhapNew === '' || $mancc === '' || $makho === '' || $ngaynhap === '') {
         $errors[] = 'Vui lòng nhập đầy đủ Mã nhập, Nhà cung cấp, Kho, Ngày nhập.';
     }
 
@@ -52,32 +76,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // Tính tổng
+            // 1. Hoàn trả số lượng tồn kho cũ (nếu có Makho cũ)
+            if ($makhoCu) {
+                foreach ($chiTietCu as $ctCu) {
+                    $stmtHoanTra = $pdo->prepare("
+                        UPDATE Tonkho 
+                        SET Soluongton = Soluongton - :sl
+                        WHERE Makho = :makho AND Masp = :masp AND Soluongton >= :sl_check
+                    ");
+                    $stmtHoanTra->execute([
+                        ':makho' => $makhoCu,
+                        ':masp' => $ctCu['Masp'],
+                        ':sl' => $ctCu['Soluong'],
+                        ':sl_check' => $ctCu['Soluong'],
+                    ]);
+                }
+            }
+
+            // 2. Xóa chi tiết cũ
+            $pdo->prepare("DELETE FROM Chitiet_Phieunhap WHERE Manhaphang = ?")->execute([$manhap]);
+
+            // 3. Tính tổng mới
             $tong = 0;
             foreach ($items as $it) {
                 $tong += $it['soluong'] * $it['dongia'];
             }
 
-            $stmtPhieu = $pdo->prepare("INSERT INTO Phieunhap (Manhaphang, Mancc, Makho, Ngaynhaphang, Tongtiennhap, Ghichu) VALUES (:ma, :ncc, :makho, :ngay, :tong, :ghichu)");
+            // 4. Cập nhật phiếu nhập
+            $stmtPhieu = $pdo->prepare("UPDATE Phieunhap SET Manhaphang = :manew, Mancc = :ncc, Makho = :makho, Ngaynhaphang = :ngay, Tongtiennhap = :tong, Ghichu = :ghichu WHERE Manhaphang = :macu");
             $stmtPhieu->execute([
-                ':ma' => $manhap,
+                ':manew' => $manhapNew,
                 ':ncc' => $mancc,
                 ':makho' => $makho,
                 ':ngay' => $ngaynhap,
                 ':tong' => $tong,
                 ':ghichu' => $ghichu,
+                ':macu' => $manhap,
             ]);
 
+            // 5. Thêm chi tiết mới và cập nhật tồn kho
             $stmtCt = $pdo->prepare("INSERT INTO Chitiet_Phieunhap (Manhaphang, Masp, Soluong, Dongianhap) VALUES (:ma, :masp, :sl, :dg)");
             foreach ($items as $it) {
                 $stmtCt->execute([
-                    ':ma' => $manhap,
+                    ':ma' => $manhapNew,
                     ':masp' => $it['masp'],
                     ':sl' => $it['soluong'],
                     ':dg' => $it['dongia'],
                 ]);
                 
-                // Cập nhật tồn kho: INSERT ... ON DUPLICATE KEY UPDATE
+                // Cập nhật tồn kho
                 $stmtTonkho = $pdo->prepare("
                     INSERT INTO Tonkho (Makho, Masp, Soluongton) 
                     VALUES (:makho, :masp, :sl)
@@ -92,12 +139,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $pdo->commit();
-            $success = 'Tạo phiếu nhập thành công và đã cập nhật tồn kho.';
+            header("Location: danh_sach_phieu_nhap.php?success=sua");
+            exit;
         } catch (Exception $e) {
             $pdo->rollBack();
-            $errors[] = 'Lỗi khi lưu phiếu: ' . htmlspecialchars($e->getMessage());
+            $errors[] = 'Lỗi khi cập nhật phiếu: ' . htmlspecialchars($e->getMessage());
         }
     }
+} else {
+    // Hiển thị dữ liệu hiện tại
+    $_POST['manhaphang'] = $phieuNhap['Manhaphang'];
+    $_POST['mancc'] = $phieuNhap['Mancc'];
+    $_POST['makho'] = $phieuNhap['Makho'] ?? '';
+    $_POST['ngaynhap'] = $phieuNhap['Ngaynhaphang'];
+    $_POST['ghichu'] = $phieuNhap['Ghichu'];
+    $_POST['masp'] = array_column($chiTietCu, 'Masp');
+    $_POST['soluong'] = array_column($chiTietCu, 'Soluong');
+    $_POST['dongia'] = array_column($chiTietCu, 'Dongianhap');
 }
 ?>
 <!doctype html>
@@ -105,18 +163,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Phiếu nhập kho</title>
+  <title>Sửa phiếu nhập kho</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 min-h-screen text-slate-100">
   <div class="max-w-5xl mx-auto p-6 space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold">Phiếu nhập kho</h1>
-        <p class="text-slate-400 text-sm mt-1">Ghi nhận hàng nhập và chi tiết sản phẩm</p>
+        <h1 class="text-2xl font-bold">Sửa phiếu nhập kho</h1>
+        <p class="text-slate-400 text-sm mt-1">Cập nhật thông tin phiếu nhập</p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
+        <a href="danh_sach_phieu_nhap.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Danh sách</a>
         <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
       </div>
     </div>
@@ -128,12 +186,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <li><?= htmlspecialchars($er) ?></li>
           <?php endforeach; ?>
         </ul>
-      </div>
-    <?php endif; ?>
-
-    <?php if ($success): ?>
-      <div class="bg-emerald-900/60 border border-emerald-700 text-emerald-100 px-4 py-3 rounded">
-        <?= htmlspecialchars($success) ?>
       </div>
     <?php endif; ?>
 
@@ -164,9 +216,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </option>
             <?php endforeach; ?>
           </select>
-          <?php if (empty($khos)): ?>
-            <p class="text-xs text-yellow-400 mt-1">Chưa có kho nào. Vui lòng tạo kho trước.</p>
-          <?php endif; ?>
         </div>
       </div>
       <div class="grid md:grid-cols-1 gap-4">
@@ -228,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="pt-2">
         <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-slate-900 font-semibold px-5 py-3 rounded">
-          Lưu phiếu nhập
+          Cập nhật phiếu nhập
         </button>
       </div>
     </form>
