@@ -1,25 +1,33 @@
 <?php
 session_start();
+require_once __DIR__ . '/db.php'; // Đảm bảo file db.php kết nối đúng PDO
 
-// 1. Kiểm tra bảo mật: Nếu chưa đăng nhập thì bắt quay lại trang dangnhap.php
+// 1. Kiểm tra đăng nhập
 if (!isset($_SESSION['user'])) {
     header("Location: dangnhap.php");
     exit;
 }
 
-// Lấy thông tin người dùng từ Session để hiển thị
 $user = $_SESSION['user'];
 
-// Dữ liệu thống kê của bạn
-$stats = [
-    'don_hang_moi' => ['so' => '0', 'tien' => '0đ', 'icon' => 'shopping-cart', 'color' => 'text-primary'],
-    'don_hang_cho' => ['so' => '0', 'icon' => 'clock', 'color' => 'text-warning'],
-    'tong_tien_kh' => ['so' => '1.785.000đ', 'icon' => 'dollar-sign', 'color' => 'text-success'],
-    'cong_no_hang' => ['so' => '2.125.000đ', 'icon' => 'file-invoice-dollar', 'color' => 'text-danger'],
-    'ton_kho' => ['so' => '4', 'icon' => 'warehouse', 'color' => 'text-info'],
-    'san_pham_het' => ['so' => '1', 'icon' => 'exclamation-triangle', 'color' => 'text-danger']
-];
-$page_title = "Trang Chủ - Quản Lý Kho Hàng";
+// 2. Xử lý tìm kiếm và lấy dữ liệu (Sửa tên cột theo Database của bạn)
+$search = trim($_GET['search'] ?? '');
+
+if ($search !== '') {
+    $stmt = $pdo->prepare("SELECT * FROM khachhang 
+                           WHERE Makh LIKE ? 
+                              OR Tenkh LIKE ? 
+                              OR Sdtkh LIKE ?");
+    $param = "%$search%";
+    $stmt->execute([$param, $param, $param]);
+} else {
+    $stmt = $pdo->prepare("SELECT * FROM khachhang ORDER BY Makh");
+    $stmt->execute();
+}
+
+$customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$page_title = "Quản Lý Khách Hàng - Quản Lý Kho Hàng";
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -29,7 +37,7 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
     <title><?php echo $page_title; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
+      <style>
         body { 
             background-color: #f8f9fa; 
             font-family: 'Segoe UI', sans-serif; 
@@ -109,7 +117,7 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
 </head>
 <body>
 
-    <nav class="sidebar">
+   <nav class="sidebar">
         <div class="text-center mb-4">
             <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
             <p class="small">Xin chào, <strong><?php echo htmlspecialchars($user['fullname']); ?></strong></p>
@@ -138,34 +146,55 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
 
     <main class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Trang Chủ</h2>
-            <div class="user-info">
-                 <span class="badge bg-info text-dark">Vai trò: <?php echo $user['role']; ?></span>
-            </div>
+            <h2>Quản Lý Khách Hàng</h2>
+            <a href="them_khachhang.php" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm khách hàng</a>
         </div>
 
-        <div class="row g-4">
-            <?php foreach ($stats as $key => $data): ?>
-            <div class="col-md-4 col-lg-3">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <i class="fas fa-<?php echo $data['icon']; ?> stat-icon <?php echo $data['color'] ?? ''; ?>"></i>
-                        <h5><?php 
-                            $titles = [
-                                'don_hang_moi' => 'Đơn hàng mới',
-                                'don_hang_cho' => 'Đang chờ',
-                                'tong_tien_kh' => 'Nợ khách hàng',
-                                'cong_no_hang' => 'Nợ nhà cung cấp',
-                                'ton_kho' => 'Cảnh báo tồn',
-                                'san_pham_het' => 'Hết hàng'
-                            ];
-                            echo $titles[$key] ?? ucwords(str_replace('_', ' ', $key));
-                        ?></h5>
-                        <h3><?php echo $data['so']; ?></h3>
-                    </div>
-                </div>
+        <div class="card-table">
+            <div class="d-flex justify-content-end mb-3">
+                <form action="" method="GET" class="search-box input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="<?= htmlspecialchars($search) ?>">
+                    <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                </form>
             </div>
-            <?php endforeach; ?>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã KH</th>
+                            <th>Tên khách hàng</th>
+                            <th>Số điện thoại</th>
+                            <th>Địa chỉ</th>
+                            <th>Loại KH</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($customers as $row): ?>
+                        <tr>
+                            <td class="fw-bold"><?= $row['Makh'] ?></td>
+                            <td><?= htmlspecialchars($row['Tenkh']) ?></td>
+                            <td><?= $row['Sdtkh'] ?></td>
+                            <td><?= htmlspecialchars($row['Diachikh']) ?></td>
+                            <td>
+                                <span class="badge bg-info text-dark">Loại <?= $row['Maloaikh'] ?></span>
+                            </td>
+                            <td class="text-center">
+                                <a href="sua_khachhang.php?id=<?= $row['Makh'] ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                <a href="xoa_khachhang.php?id=<?= $row['Makh'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Xóa khách hàng này?')"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        
+                        <?php if (empty($customers)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu khách hàng.</td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
