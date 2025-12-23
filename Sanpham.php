@@ -1,31 +1,28 @@
 <?php
 // Kết nối CSDL
 $conn = mysqli_connect("localhost", "root", "", "quanlykho");
+
 $ma = "";
 $ten = "";
-// hiển thi ra tên danh mục
-$sql_danhmuc = "SELECT Tendm FROM danhmucsp ORDER BY Tendm ASC";
-// thực thi câu truy vấn
-$result_danhmuc = mysqli_query($conn, $sql_danhmuc);
 
 // --- Cải thiện: Xử lý tìm kiếm ---
-$where_clause = "WHERE 1=1";
+$where = "WHERE 1=1";
 if (isset($_GET['timkiem'])) {
     if (!empty($_GET['tkma'])) {
         $ma = mysqli_real_escape_string($conn, $_GET['tkma']);
-        $where_clause .= " AND sp.Masp LIKE '%$ma%'";
+        $where  .= " AND sp.Masp LIKE '%$ma%'";
     }
     if (!empty($_GET['tkten'])) {
         $ten = mysqli_real_escape_string($conn, $_GET['tkten']);
-        $where_clause .= " AND sp.Tensp LIKE '%$ten%'";
+        $where .= " AND sp.Tensp LIKE '%$ten%'";
     }
 }
 
-$sql = "
-SELECT sp.*, tk.soluongton
+$sql = "SELECT sp.Masp, sp.Tensp, dm.Tendm, sp.Dvt, sp.Giaban, tk.soluongton
 FROM sanpham sp
 LEFT JOIN tonkho tk ON sp.Masp = tk.Masp
-$where_clause
+LEFT JOIN danhmucsp dm ON sp.Madm = dm.Madm
+$where
 ORDER BY sp.Masp ASC
 ";
 
@@ -73,14 +70,14 @@ if (!$list) {
             <table class="bang-san-pham">
                 <thead>
                     <tr>
-                        <th class="cot-anh">Ảnh</th>
+                        
                         <th class="cot-sap-xep" data-sort="Masp">Mã SP</th>
                         <th class="cot-sap-xep" data-sort="Tensp">Tên sản phẩm</th>
                         <th class="cot-sap-xep" data-sort="Madm">Danh mục</th> 
                         <th class="cot-sap-xep" data-sort="Dvt">ĐVT</th>
                         <th class="cot-sap-xep" data-sort="Giaban">Giá bán</th>
                         <th class="cot-sap-xep" data-sort="Soluongton">Tồn kho</th>
-                        <th class="cot-sap-xep">Dạng bán</th>
+                       
                         <th class="cot-hanh-dong-nut">Thao tác</th> 
                     </tr>
                 </thead>
@@ -88,20 +85,19 @@ if (!$list) {
                     
                     <?php while ($row = mysqli_fetch_assoc($list)) { ?>
                     <tr>
-                        <td class="cot-anh">
-                            <div class="khung-anh-san-pham">
-                                <img src="/images/sanpham/<?= htmlspecialchars($row['Anhsp']) ?>" alt="Ảnh sản phẩm">
-                            </div>
-                        </td>
+                       
                         <td><?= htmlspecialchars($row['Masp']) ?></td>
                         <td><?= htmlspecialchars($row['Tensp']) ?></td>
-                        <td><?= htmlspecialchars($row['Madm']) ?></td>
+                        <td><?= htmlspecialchars($row['Tendm']) ?>
+                        
+                    
+                    </td>
                         <td><?= htmlspecialchars($row['Dvt']) ?></td>
                         <td><?= number_format($row['Giaban'], 0, ',', '.') ?></td> 
                         
                         <td><?= htmlspecialchars($row['soluongton'] ?? 0) ?></td> 
                         
-                        <td><?= htmlspecialchars($row['Dangban'] ?? 'N/A') ?></td>
+                       
                         
                         <td class="cot-hanh-dong-nut">
                             <a href="/quanlykho/chinhsuasanpham.php?id=<?= $row['Masp'] ?>" class="nut-hanh-dong nut-sua"><i class="fas fa-edit"></i></a>

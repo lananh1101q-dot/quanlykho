@@ -1,188 +1,169 @@
 <?php
+// ===============================
 // KẾT NỐI DATABASE
+// ===============================
 $conn = mysqli_connect("localhost", "root", "", "quanlykho");
+mysqli_set_charset($conn, "utf8");
 
-$sql_danhmuc = "SELECT  Tendm FROM danhmucsp  ORDER BY Tendm ASC";
+if (!$conn) {
+    die("Lỗi kết nối CSDL: " . mysqli_connect_error());
+}
+
+// ===============================
+// LẤY DANH MỤC
+// ===============================
+$sql_danhmuc = "SELECT Madm, Tendm FROM danhmucsp ORDER BY Tendm ASC";
 $result_danhmuc = mysqli_query($conn, $sql_danhmuc);
 
-// Kiểm tra lỗi truy vấn (Tùy chọn)
-if (!$result_danhmuc) {
-    die("Lỗi truy vấn danh mục: " . mysqli_error($conn));
-}
-
-// XỬ LÝ THÊM DỮ LIỆU
+// ===============================
+// XỬ LÝ LƯU (BACKEND)
+// ===============================
 if (isset($_POST['btnluu'])) {
-    // Đổi tên biến cho dễ quản lý
-    $Masp   = $_POST['Masp'];
-    $Tensp  = $_POST['Tensp'];
-    $Madm   = $_POST['Madm'];
-    $Dvt    = $_POST['Dvt'];
-    
-    // Xử lý Giaban: chuyển sang kiểu số thập phân, loại bỏ dấu phẩy (nếu có)
-    $Giaban = str_replace(',', '', $_POST['Giaban']); 
-    // Nếu dùng decimal, giá trị phải là số
-    $Giaban = floatval($Giaban);
-    $sql = "INSERT INTO sanpham(Masp, Tensp, Madm, Dvt, Giaban)
-            VALUES ('$Masp', '$Tensp', '$Madm', '$Dvt', '$Giaban')";   
-           
 
-   if (mysqli_query($conn, $sql)) {
-        // Thành công
-        echo "luu thanh cong". $sql . "<br>"; 
-        header("Location: taosanpham.php");
-        
-        exit;
+    $Masp   = trim($_POST['Masp']);
+    $Tensp  = trim($_POST['Tensp']);
+    $Madm   = $_POST['Madm'];
+    $Dvt    = trim($_POST['Dvt']);
+    $Giaban = str_replace(',', '', $_POST['Giaban']);
+
+    // --- Validate backend ---
+    if ($Masp == "" || $Tensp == "" || $Madm == "" || $Dvt == "") {
+        echo "<script>alert('Vui lòng nhập đầy đủ thông tin!');</script>";
+    } elseif (!is_numeric($Giaban)) {
+        echo "<script>alert('Giá bán phải là số!');</script>";
     } else {
-        // THẤT BẠI: In ra lỗi SQL
-        echo "Lỗi: " . $sql . "<br>" . mysqli_error($conn);
+
+        // --- Check trùng mã ---
+        $check = mysqli_query($conn, "SELECT 1 FROM sanpham WHERE Masp='$Masp'");
+        if (mysqli_num_rows($check) > 0) {
+            echo "<script>alert('Mã sản phẩm đã tồn tại!');</script>";
+        } else {
+
+            // --- Insert ---
+            $sql = "INSERT INTO sanpham (Masp, Tensp, Madm, Dvt, Giaban)
+                    VALUES ('$Masp', '$Tensp', '$Madm', '$Dvt', $Giaban)";
+
+            if (mysqli_query($conn, $sql)) {
+                header("Location: Sanpham.php");
+                exit;
+            } else {
+                echo "<script>alert('Lỗi thêm sản phẩm!');</script>";
+            }
+        }
     }
 }
- 
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tạo Sản Phẩm</title>
     <link rel="stylesheet" href="taosanpham.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 </head>
 <body>
-   
+
 <div class="khung-trang">
-        
-      
-    
     <div class="khung-tieu-de-chinh">
-        <h1 class="tieu-de-lon">Tạo Sản Phẩm mới</h1>
-        <a href="/quanlykho/Sanpham.php" class="nut-quay-lai" title="Quay lại danh sách sản phẩm">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        
-        
-        
+        <h1 class="tieu-de-lon">Tạo Sản Phẩm Mới</h1>
 
         <div class="noi-dung-chinh-form">
-            
-            <form id="form-san-pham" action="/quanlykho/taosanpham.php" method="POST">
-                
-                <div class="khung-nhap-lieu thong-tin-co-ban">
-                    <h3 class="tieu-de-khung">Thông tin cơ bản</h3>
+
+            <form id="form-san-pham" method="POST">
+
+                <!-- THÔNG TIN CƠ BẢN -->
+                <div class="khung-nhap-lieu">
+                    <h3>Thông tin cơ bản</h3>
 
                     <div class="nhom-truong hai-cot">
                         <div class="truong-nhap">
-                            <label for="Masp">Mã sản phẩm*</label>
-                            <input type="text" id="Masp" name="Masp" placeholder="VD: SP001" required>
+                            <label>Mã sản phẩm *</label>
+                            <input type="text" name="Masp">
                         </div>
+
                         <div class="truong-nhap">
-                            <label for="Tensp">Tên sản phẩm*</label>
-                             <input type="text" id="Tensp" name="Tensp" placeholder="Nhập tên sản phẩm" required>
+                            <label>Tên sản phẩm *</label>
+                            <input type="text" name="Tensp">
                         </div>
                     </div>
 
-                 
                     <div class="nhom-truong hai-cot">
-                        <div class="truong-nhap lua-chon-va-them">
-                            <label for="Madm">Danh mục</label>
-                             <div class="khung-input-nhom">
-                                <select id="Madm" name="Madm">
-                                    <option value="">Chọn một tùy chọn</option>
-                                     <?php
-                                    // Kiểm tra xem có dữ liệu trả về không
-                                    if (mysqli_num_rows($result_danhmuc) > 0) {
-                                        // Lặp qua từng dòng dữ liệu để tạo thẻ <option>
-                                        while ($row = mysqli_fetch_assoc($result_danhmuc)) {
-                                            // Giá trị (value) là Madm (Mã danh mục)
-                                            // Hiển thị cho người dùng là Tendm (Tên danh mục)
-                                            echo '<option value="'  . $row['Tendm'] . '</option>';
-                                        }
-                                    } else {
-                                        echo '<option value="" disabled>Chưa có danh mục nào</option>';
-                                    }
-                                    ?>
-                                </select>
-                                <button type="button" class="nut-them" id="nut-them-dm">+</button>
-                            </div>
+                        <div class="truong-nhap">
+                            <label>Danh mục *</label>
+                            <select name="Madm">
+                                <option value="">-- Chọn danh mục --</option>
+                                <?php while ($row = mysqli_fetch_assoc($result_danhmuc)): ?>
+                                    <option value="<?= $row['Madm'] ?>">
+                                        <?= $row['Tendm'] ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
                         </div>
-                        <div class="truong-nhap lua-chon-va-them">
-                            <label for="Dvt">Đơn vị tính</label>
-                            <div class="khung-input-nhom">
-                                <input type="text" id="Dvt" name="Dvt" placeholder="Ví dụ: Chiếc, Kg, Hộp">
-                                <button type="button" class="nut-them" id="nut-them-dvt">+</button>
-                            </div>
-                            <small class="chu-thich">Đơn vị tính mặc định</small>
-                        </div>
-                    </div>
 
-                    <div class="truong-nhap mot-cot vung-tai-anh">
-                        <label>Chọn ảnh định dạng png, jpg, jpeg</label>
-                        <input type="file" id="anh_san_pham" name="anh_san_pham" style="display:none;">
-                        <div class="khu-vuc-keo-tha" onclick="document.getElementById('anh_san_pham').click()">
-                            <p>Kéo thả tệp của bạn hoặc <a href="#">Tìm kiếm</a></p>
+                        <div class="truong-nhap">
+                            <label>Đơn vị tính *</label>
+                            <input type="text" name="Dvt">
                         </div>
                     </div>
                 </div>
 
-                <div class="khung-nhap-lieu gia-sp">
-                    <h3 class="tieu-de-khung">Giá sản phẩm</h3>
-
-                    
-                        <div class="truong-nhap gia-co-dv">
-                            <label for="Giaban">Giá bán*</label>
-                            <div class="khung-gia-dv">
-                                <input type="number" id="Giaban" name="Giaban" value="0" required>
-                                <span class="don-vi">đ</span>
-                            </div>
-                        </div>
-        
-                   
+                <!-- GIÁ -->
+                <div class="khung-nhap-lieu">
+                    <h3>Giá sản phẩm</h3>
+                    <div class="truong-nhap">
+                        <label>Giá bán *</label>
+                        <input type="text" name="Giaban" value="0">
+                    </div>
                 </div>
 
-                
+                <!-- NÚT -->
+                <div class="nhom-nut-chuc-nang">
+                    <a href="Sanpham.php" class="nut nut-trove">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
 
-                <div class="vung-nut-luu">
-                    <button type="submit" name="btnluu" class="nut-luu-chinh" id="nut-submit-sp">Lưu Sản Phẩm</button>
+                    <button type="submit" name="btnluu" class="nut nut-them-moi">
+                        <i class="fas fa-save"></i> Lưu Sản Phẩm
+                    </button>
                 </div>
+
             </form>
         </div>
     </div>
+</div>
 
-    <script>
-        // Tên biến JavaScript khớp với ID của form
-        var inputGiaNhap = document.getElementById("gianhap");
-        var inputGiaBanLe = document.getElementById("Giaban"); // ID khớp cột Giaban CSDL
-        var inputLoiNhuan = document.getElementById("loi-nhuan");
+<!-- ===============================
+     JAVASCRIPT VALIDATE + DIALOG
+================================ 
+<script>
+document.getElementById("form-san-pham").addEventListener("submit", function (e) {
 
-        // Hàm tính lợi nhuận
-        function tinhLoiNhuan() {
-            var nhap = parseFloat(inputGiaNhap.value) || 0;
-            var ban = parseFloat(inputGiaBanLe.value) || 0;
-            
-            if (ban > nhap && nhap > 0) {
-                var tyLeLoiNhuan = ((ban - nhap) / nhap) * 100;
-                inputLoiNhuan.value = tyLeLoiNhuan.toFixed(2);
-            } else {
-                inputLoiNhuan.value = "0.00";
-            }
-        }
+    const masp   = document.querySelector("[name='Masp']").value.trim();
+    const tensp  = document.querySelector("[name='Tensp']").value.trim();
+    const madm   = document.querySelector("[name='Madm']").value;
+    const dvt    = document.querySelector("[name='Dvt']").value.trim();
+    const giaban = document.querySelector("[name='Giaban']").value.trim();
 
-        // Gắn sự kiện (Giống như trong code mẫu bạn cung cấp)
-        inputGiaNhap.addEventListener("input", tinhLoiNhuan);
-        inputGiaBanLe.addEventListener("input", tinhLoiNhuan);
-        
-        // Sự kiện khi click vào nút thêm Danh mục
-        document.getElementById("nut-them-dm").onclick = function() {
-            alert("Mở pop-up để tạo mới Danh mục (Madm) và cập nhật dropdown!");
-        };
-        
-        // Sự kiện khi click vào nút thêm Đơn vị tính
-        document.getElementById("nut-them-dvt").onclick = function() {
-            alert("Mở pop-up để tạo mới Đơn vị tính (Dvt)!");
-        };
+    if (masp === "" || tensp === "" || madm === "" || dvt === "") {
+        alert("❌ Vui lòng nhập đầy đủ thông tin!");
+        e.preventDefault();
+        return;
+    }
 
-    </script>
+    if (giaban === "" || isNaN(giaban)) {
+        alert("❌ Giá bán phải là số!");
+        e.preventDefault();
+        return;
+    }
+
+    if (Number(giaban) < 0) {
+        alert("❌ Giá bán không được nhỏ hơn 0!");
+        e.preventDefault();
+        return;
+    }
+});
+</script>-->
 
 </body>
 </html>
