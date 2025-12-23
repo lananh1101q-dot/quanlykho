@@ -1,35 +1,48 @@
 <?php
 session_start();
+require_once __DIR__ . '/db.php';
 
-// 1. Kiểm tra bảo mật: Nếu chưa đăng nhập thì bắt quay lại trang dangnhap.php
 if (!isset($_SESSION['user'])) {
     header("Location: dangnhap.php");
     exit;
 }
 
-// Lấy thông tin người dùng từ Session để hiển thị
 $user = $_SESSION['user'];
+$makh_edit = $_GET['id'] ?? '';
 
-// Dữ liệu thống kê của bạn
-$stats = [
-    'don_hang_moi' => ['so' => '0', 'tien' => '0đ', 'icon' => 'shopping-cart', 'color' => 'text-primary'],
-    'don_hang_cho' => ['so' => '0', 'icon' => 'clock', 'color' => 'text-warning'],
-    'tong_tien_kh' => ['so' => '1.785.000đ', 'icon' => 'dollar-sign', 'color' => 'text-success'],
-    'cong_no_hang' => ['so' => '2.125.000đ', 'icon' => 'file-invoice-dollar', 'color' => 'text-danger'],
-    'ton_kho' => ['so' => '4', 'icon' => 'warehouse', 'color' => 'text-info'],
-    'san_pham_het' => ['so' => '1', 'icon' => 'exclamation-triangle', 'color' => 'text-danger']
-];
-$page_title = "Trang Chủ - Quản Lý Kho Hàng";
+// Lấy dữ liệu cũ
+$stmt = $pdo->prepare("SELECT * FROM khachhang WHERE Makh = ?");
+$stmt->execute([$makh_edit]);
+$customer = $stmt->fetch();
+
+if (!$customer) {
+    die("Không tìm thấy khách hàng!");
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $tenkh = $_POST['tenkh'];
+    $sdtkh = $_POST['sdtkh'];
+    $diachikh = $_POST['diachikh'];
+    $maloaikh = $_POST['maloaikh'];
+
+    try {
+        $sql = "UPDATE khachhang SET Tenkh = ?, Sdtkh = ?, Diachikh = ?, Maloaikh = ? WHERE Makh = ?";
+        $pdo->prepare($sql)->execute([$tenkh, $sdtkh, $diachikh, $maloaikh, $makh_edit]);
+        header("Location: khachhang.php");
+        exit;
+    } catch (PDOException $e) {
+        $error = "Lỗi cập nhật: " . $e->getMessage();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?></title>
+    <title>Sửa Khách Hàng</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
+      <style>
         body { 
             background-color: #f8f9fa; 
             font-family: 'Segoe UI', sans-serif; 
@@ -108,8 +121,7 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
     </style>
 </head>
 <body>
-
-    <nav class="sidebar">
+      <nav class="sidebar">
         <div class="text-center mb-4">
             <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
             <p class="small">Xin chào, <strong><?php echo htmlspecialchars($user['fullname']); ?></strong></p>
@@ -137,38 +149,31 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
     </nav>
 
     <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Trang Chủ</h2>
-            <div class="user-info">
-                 <span class="badge bg-info text-dark">Vai trò: <?php echo $user['role']; ?></span>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <?php foreach ($stats as $key => $data): ?>
-            <div class="col-md-4 col-lg-3">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <i class="fas fa-<?php echo $data['icon']; ?> stat-icon <?php echo $data['color'] ?? ''; ?>"></i>
-                        <h5><?php 
-                            $titles = [
-                                'don_hang_moi' => 'Đơn hàng mới',
-                                'don_hang_cho' => 'Đang chờ',
-                                'tong_tien_kh' => 'Nợ khách hàng',
-                                'cong_no_hang' => 'Nợ nhà cung cấp',
-                                'ton_kho' => 'Cảnh báo tồn',
-                                'san_pham_het' => 'Hết hàng'
-                            ];
-                            echo $titles[$key] ?? ucwords(str_replace('_', ' ', $key));
-                        ?></h5>
-                        <h3><?php echo $data['so']; ?></h3>
+        <h2 class="mb-4">Sửa Khách Hàng: <?= htmlspecialchars($customer['Makh']) ?></h2>
+        <div class="form-card">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tên Khách Hàng</label>
+                        <input type="text" name="tenkh" class="form-control" value="<?= htmlspecialchars($customer['Tenkh']) ?>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Số Điện Thoại</label>
+                        <input type="text" name="sdtkh" class="form-control" value="<?= $customer['Sdtkh'] ?>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Mã Loại KH</label>
+                        <input type="number" name="maloaikh" class="form-control" value="<?= $customer['Maloaikh'] ?>" required>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Địa Chỉ</label>
+                        <textarea name="diachikh" class="form-control" rows="2"><?= htmlspecialchars($customer['Diachikh']) ?></textarea>
                     </div>
                 </div>
-            </div>
-            <?php endforeach; ?>
+                <button type="submit" class="btn btn-success px-4">Cập nhật</button>
+                <a href="khachhang.php" class="btn btn-secondary px-4">Hủy bỏ</a>
+            </form>
         </div>
     </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
