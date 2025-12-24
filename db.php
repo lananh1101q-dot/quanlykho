@@ -3,7 +3,7 @@
 $dbHost = '127.0.0.1';
 $dbName = 'QuanLyKho';
 $dbUser = 'root';
-$dbPass = '1234';
+$dbPass = '';
 $dbCharset = 'utf8mb4';
 
 $dsn = "mysql:host={$dbHost};dbname={$dbName};charset={$dbCharset}";
