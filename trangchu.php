@@ -142,10 +142,25 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
                 </ul>
             </li>
 
+ <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
+                  <i class="fas fa-file-import"></i> Phiếu nhập kho
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
 
-            <li class="nav-item">
-                <a class="nav-link" href="phieu_nhap.php"><i class="fas fa-file-import"></i> Phiếu nhập kho</a>
-            </li>
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_nhap.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu nhập
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_nhap.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu nhập
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
                 <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
@@ -225,6 +240,15 @@ document.getElementById("btnSanPham").addEventListener("click", function () {
 document.getElementById("btnBaoCao").addEventListener("click", function () {
     document.getElementById("submenuBaoCao").classList.toggle("d-none");
 });
+const btnPhieuNhap = document.getElementById("btnPhieuNhap");
+const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
+
+if (btnPhieuNhap) {
+    btnPhieuNhap.addEventListener("click", function () {
+        submenuPhieuNhap.classList.toggle("d-none");
+    });
+}
+
 </script>
 </body>
 </html>

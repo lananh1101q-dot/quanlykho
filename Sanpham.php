@@ -9,7 +9,7 @@ require_once 'Classes/PHPExcel/IOFactory.php';
 // ===============================
 function tao_ins($Masp, $Tensp, $Madm, $dvt, $giaban, $conn) {
     $sql = "INSERT INTO Sanpham
-            VALUES ('$Masp', '$Tensp', '$Madm', '$dvt', $giaban)";
+            VALUES ('$Masp', '$Tensp', $Madm, '$dvt', $giaban)";
     return mysqli_query($conn, $sql);
 }
 
@@ -34,15 +34,17 @@ if (isset($_POST['btnUpload'])) {
         $Masp = $sheetData[$i]['A'];
         $Tensp = $sheetData[$i]['B'];
         $Madm = $sheetData[$i]['C'];
-       
-
         $dvt   = $sheetData[$i]['D'];
       $giaban   = $sheetData[$i]['E'];
 
         // Không insert dòng trống
-        if ($Masp != "") {
-            tao_ins($Masp, $Tensp, $Madm, $dvt, $giaban, $conn);
+       if ($Masp != "") {
+            if (!tao_ins($Masp, $Tensp, $Madm, $dvt, $giaban, $conn)) {
+                echo "Lỗi insert dòng $i: " . mysqli_error($conn);
+                exit;
+            }
         }
+
     }
 
     echo "<script>alert('Nhập dữ liệu từ Excel thành công!'); window.location.href='Sanpham.php';</script>";
@@ -56,7 +58,7 @@ if (isset($_GET['export'])) {
     // ===== CODE XUẤT EXCEL =====
     $objExcel = new PHPExcel();
     $objExcel->setActiveSheetIndex(0);
-    $sheet = $objExcel->getActiveSheet()->setTitle('DSTacgia');
+    $sheet = $objExcel->getActiveSheet()->setTitle('Danh sách sản phẩm');
 
     $rowCount = 1;
 
@@ -94,8 +96,8 @@ if (isset($_GET['export'])) {
     $ten = $_GET['tkten'] ?? '';
 
     $where = " WHERE 1=1 ";
-    if ($ma != '')  $where .= " AND t.ma LIKE '%$ma%'";
-    if ($ten != '') $where .= " AND t.ten LIKE '%$ten%'";
+    if ($ma != '')  $where .= " AND t.Masp LIKE '%$ma%'";
+    if ($ten != '') $where .= " AND t.Tensp LIKE '%$ten%'";
 
     $sql = "
         SELECT t.Masp, t.Tensp, dm.Tendm,  t.Dvt,t.Giaban 
@@ -160,14 +162,27 @@ if (isset($_GET['timkiem'])) {
         $where .= " AND Tensp LIKE '%$ten%'";
     }
 }
-$sql = "SELECT t.Masp, t.Tensp, dm.Tendm, t.Dvt, t.Giaban FROM Sanpham t
-left join Danhmucsp dm on t.Madm = dm.Madm
-$where";
+$limit = 10; // 10 sản phẩm / trang
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($page - 1) * $limit;
+$sqlCount = "SELECT COUNT(*) as total FROM Sanpham t 
+LEFT JOIN Danhmucsp dm ON t.Madm = dm.Madm $where";
+$totalRow = mysqli_fetch_assoc(mysqli_query($conn, $sqlCount));
+$totalPage = ceil($totalRow['total'] / $limit);
 
+$sql = "SELECT t.Masp, t.Tensp, dm.Tendm, t.Dvt, t.Giaban 
+        FROM Sanpham t
+        LEFT JOIN Danhmucsp dm ON t.Madm = dm.Madm
+        $where
+        LIMIT $limit OFFSET $offset";
 $list = mysqli_query($conn, $sql);
+
+
+
 if (!$list) {
     die("Lỗi truy vấn: " . mysqli_error($conn));
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -262,6 +277,43 @@ if (!$list) {
         .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; background: #e8f0fe; color: #1967d2; }
         .nut-hanh-dong { color: #888; margin: 0 5px; cursor: pointer; text-decoration: none; }
         .nut-hanh-dong:hover { color: #ff4d4d; }
+        .pagination-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 250px; /* đúng bằng width sidebar */
+            right: 0;
+            background: #fff;
+            padding: 10px 20px;
+            border-top: 1px solid #ddd;
+            z-index: 999;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .pagination a {
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #f1f1f1;
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .pagination a.active {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .pagination a:hover {
+            background: #0056b3;
+            color: #fff;
+        }
+
+
        
     </style>
 </head>
@@ -366,7 +418,7 @@ if (!$list) {
         </button>
 
   
-            <a href="ql.php?export=1&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>" 
+            <a href="Sanpham.php?export=1&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>" 
         class="nut nut-xuat">
         Xuất Excel
         </a>
@@ -421,12 +473,22 @@ if (!$list) {
                     <?php endwhile; ?>
                 </tbody>
             </table>
-
-            <div style="margin-top: 20px; text-align: right; color: #888; font-size: 13px;">
-                Hiển thị tất cả sản phẩm trong kho
-            </div>
-
         </div>
+
+           <div class="pagination-fixed">
+    <div class="pagination">
+        <?php for ($i = 1; $i <= $totalPage; $i++): ?>
+            <a class="<?= ($i == $page) ? 'active' : '' ?>"
+               href="?page=<?= $i ?>&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>">
+                <?= $i ?>
+            </a>
+        <?php endfor; ?>
+    </div>
+</div>
+
+
+
+        
     </div>
 <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {
