@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </style>
 </head>
 <body>
-      <nav class="sidebar">
+   <nav class="sidebar">
         <div class="text-center mb-4">
             <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
             <p class="small">Xin chào, <strong><?php echo htmlspecialchars($user['fullname']); ?></strong></p>
@@ -142,6 +142,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <li class="nav-item">
                 <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
             </li>
+            <li class="nav-item">
+            <a class="nav-link" href="loaikhachhang.php"><i class="fas fa-tag"></i> Loại khách hàng</a>
+        </li>
             <li class="nav-item">
                 <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             </li>

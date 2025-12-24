@@ -27,7 +27,7 @@ if ($search !== '') {
 
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$page_title = "Quản Lý Khách Hàng - Quản Lý Kho Hàng";
+$page_title = "Khách Hàng - Quản Lý Kho Hàng";
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -139,6 +139,9 @@ $page_title = "Quản Lý Khách Hàng - Quản Lý Kho Hàng";
                 <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
             </li>
             <li class="nav-item">
+            <a class="nav-link" href="loaikhachhang.php"><i class="fas fa-tag"></i> Loại khách hàng</a>
+        </li>
+            <li class="nav-item">
                 <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             </li>
         </ul>
@@ -146,7 +149,7 @@ $page_title = "Quản Lý Khách Hàng - Quản Lý Kho Hàng";
 
     <main class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Quản Lý Khách Hàng</h2>
+            <h2> Khách Hàng</h2>
             <a href="them_khachhang.php" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm khách hàng</a>
         </div>
 
