@@ -4,7 +4,8 @@ USE QuanLyKho;
 
 CREATE TABLE Danhmucsp (
     Madm INT PRIMARY KEY AUTO_INCREMENT,
-    Tendm VARCHAR(100) NOT NULL UNIQUE
+    Tendm VARCHAR(100) NOT NULL UNIQUE,
+    Mota VARCHAR(100)
 );
 
 
@@ -45,10 +46,12 @@ CREATE TABLE Khachhang (
 CREATE TABLE Phieunhap (
     Manhaphang VARCHAR(50) PRIMARY KEY,
     Mancc VARCHAR(50),
+    Makho VARCHAR(50),
     Ngaynhaphang DATE NOT NULL,
     Tongtiennhap DECIMAL(18, 2) DEFAULT 0,
     Ghichu TEXT,
-    FOREIGN KEY (Mancc) REFERENCES Nhacungcap(Mancc)
+    FOREIGN KEY (Mancc) REFERENCES Nhacungcap(Mancc),
+    FOREIGN KEY (Makho) REFERENCES Kho(Makho)
 );
 
 
@@ -107,4 +110,13 @@ CREATE TABLE Nguoidung (
     Hovaten VARCHAR(255),
     Email VARCHAR(100),
     Vaitro VARCHAR(50) NOT NULL
+);
+CREATE TABLE Thanhtoan (
+    Matt INT AUTO_INCREMENT PRIMARY KEY,
+    Maxuathang VARCHAR(50),
+    Ngaythanhtoan DATE NOT NULL,
+    Sotienthanhtoan DECIMAL(18,2) NOT NULL,
+    Hinhthuc VARCHAR(50),
+    Ghichu TEXT,
+    FOREIGN KEY (Maxuathang) REFERENCES Phieuxuat(Maxuathang)
 );

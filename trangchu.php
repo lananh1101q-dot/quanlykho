@@ -109,24 +109,83 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
 </head>
 <body>
 
-    <nav class="sidebar">
+   <nav class="sidebar">
         <div class="text-center mb-4">
             <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
-            <p class="small">Xin chào, <strong><?php echo htmlspecialchars($user['fullname']); ?></strong></p>
-        </div>
+          </div>
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="Sanpham.php"><i class="fas fa-box"></i> Quản lý sản phẩm</a>
+           <li class="nav-item">
+                <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
+                    <i class="fas fa-box"></i> Quản lý sản phẩm
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+
+                <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
+                    <li class="nav-item">
+                        <a class="nav-link" href="Sanpham.php">
+                            <i class="fas fa-cube"></i> Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dmsp.php">
+                            <i class="fas fa-tags"></i> Danh mục sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Nhacungcap.php">
+                            <i class="fas fa-truck"></i> Nhà cung cấp
+                        </a>
+                    </li>
+                </ul>
             </li>
+
+ <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
+                  <i class="fas fa-file-import"></i> Phiếu nhập kho
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
+
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_nhap.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu nhập
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_nhap.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu nhập
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
-                <a class="nav-link" href="phieu_nhap.php"><i class="fas fa-file-import"></i> Phiếu nhập kho</a>
+                <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                    <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+
+                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                    <li class="nav-item">
+                        <a class="nav-link" href="baocao_banhang.php">
+                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="tonkho.php">
+                            <i class="fas fa-warehouse"></i> Báo cáo tồn kho
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="baocao_khachhang.php">
+                            <i class="fas fa-users"></i> Báo cáo khách hàng
+                        </a>
+                    </li>
+                </ul>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#"><i class="fas fa-chart-bar"></i> Báo cáo & Thống kê</a>
-            </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
             </li>
@@ -135,6 +194,7 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
             </li>
         </ul>
     </nav>
+
 
     <main class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -169,6 +229,26 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
         </div>
     </main>
 
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+document.getElementById("btnSanPham").addEventListener("click", function () {
+    const menu = document.getElementById("submenuSanPham");
+    menu.classList.toggle("d-none");
+    
+});
+document.getElementById("btnBaoCao").addEventListener("click", function () {
+    document.getElementById("submenuBaoCao").classList.toggle("d-none");
+});
+const btnPhieuNhap = document.getElementById("btnPhieuNhap");
+const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
+
+if (btnPhieuNhap) {
+    btnPhieuNhap.addEventListener("click", function () {
+        submenuPhieuNhap.classList.toggle("d-none");
+    });
+}
+
+</script>
 </body>
 </html>
