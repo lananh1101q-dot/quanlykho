@@ -111,3 +111,12 @@ CREATE TABLE Nguoidung (
     Email VARCHAR(100),
     Vaitro VARCHAR(50) NOT NULL
 );
+CREATE TABLE Thanhtoan (
+    Matt INT AUTO_INCREMENT PRIMARY KEY,
+    Maxuathang VARCHAR(50),
+    Ngaythanhtoan DATE NOT NULL,
+    Sotienthanhtoan DECIMAL(18,2) NOT NULL,
+    Hinhthuc VARCHAR(50),
+    Ghichu TEXT,
+    FOREIGN KEY (Maxuathang) REFERENCES Phieuxuat(Maxuathang)
+);
