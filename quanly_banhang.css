@@ -1,0 +1,140 @@
+/* ================= RESET & CHUNG ================= */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+h3 {
+    margin-top: 40px;
+    color: #34495e;
+    border-left: 5px solid #3498db;
+    padding-left: 10px;
+}
+
+h4 {
+    margin-top: 20px;
+    color: #2c3e50;
+}
+
+/* ================= KHUNG CHỨC NĂNG ================= */
+.section {
+    background: #ffffff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: #fff;
+}
+
+table th {
+    background: #3498db;
+    color: white;
+    padding: 10px;
+    font-weight: 600;
+}
+
+table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+table tr:hover {
+    background: #f1f7ff;
+}
+
+/* ================= FORM ================= */
+form {
+    margin: 15px 0;
+}
+
+form input {
+    padding: 8px 10px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+/* ================= BUTTON ================= */
+button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* ================= LINK XÓA ================= */
+a {
+    color: #e74c3c;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ================= THỐNG KÊ ================= */
+.tong {
+    font-size: 22px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-top: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    table tr {
+        margin-bottom: 15px;
+    }
+
+    table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+
+    table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        text-align: left;
+        font-weight: bold;
+    }
+}
