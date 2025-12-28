@@ -176,10 +176,11 @@ $page_title = "Khách Hàng - Quản Lý Kho Hàng";
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+               <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
                     <li class="nav-item">
                         <a class="nav-link" href="quanly_banhang.php">
                             <i class="fas fa-cash-register"></i> Quản lý bán hàng
+
                         </a>
                     </li>
                     <li class="nav-item">
@@ -187,11 +188,7 @@ $page_title = "Khách Hàng - Quản Lý Kho Hàng";
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 
