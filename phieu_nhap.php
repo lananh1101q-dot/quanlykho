@@ -246,8 +246,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
+                        <a class="nav-link" href="quanly_khachhang.php">
+                            <i class="fas fa-users"></i> Quản lý bán hàng
                         </a>
                     </li>
                 </ul>
