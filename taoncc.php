@@ -1,37 +1,50 @@
 <?php
-// Kết nối CSDL
+// KẾT NỐI DATABASE
 $conn = mysqli_connect("localhost", "root", "", "quanlykho");
-$ma = "";
-$ten = "";
-$where = " WHERE 1=1 ";
 
-if (isset($_GET['timkiem'])) {
-    if (!empty($_GET['tkma'])) {
-        $ma = $_GET['tkma'];
-        $where .= " AND Madm  LIKE '%$ma%'";
-    }
-    if (!empty($_GET['tkten'])) {
-        $ten = $_GET['tkten'];
-        $where .= " AND Tendm LIKE '%$ten%'";
+// XỬ LÝ THÊM DỮ LIỆU
+
+if (isset($_POST['btnTao'])) {
+ // Đổi tên biến cho dễ quản lý
+    $Mancc   = $_POST['Mancc'];
+    $Tenncc  = $_POST['Tenncc'];
+    $Sdt   = $_POST['Sdtncc'];
+    $Diachi   = $_POST['Diachincc'];
+   
+    // --- Validate backend ---
+    if ($Mancc == "" || $Tenncc == ""|| $Sdt == "" || $Diachi == "" ) {
+        echo "<script>alert('Vui lòng nhập đầy đủ thông tin!');</script>";
+    }  else {
+
+        // --- Check trùng mã ---
+        $check = mysqli_query($conn, "SELECT 1 FROM Nhacungcap WHERE Mancc='$Mancc'");
+        if (mysqli_num_rows($check) > 0) {
+            echo "<script>alert('Mã nhà cung cấp đã tồn tại!');</script>";
+        } else {
+
+            // --- Insert ---
+            $sql = "INSERT INTO Nhacungcap (Mancc, Tenncc, Sdtncc, Diachincc)
+                    VALUES ('$Mancc', '$Tenncc', '$Sdt', '$Diachi')";
+
+            if (mysqli_query($conn, $sql)) {
+                echo "<script>alert('thêm thành công!'); window.location.href='Nhacungcap.php';</script>";
+                
+                exit;
+            } else {
+                echo "<script>alert('Lỗi thêm sản phẩm!');</script>";
+            }
+        }
     }
 }
-// Phân trang
-$limit = 10; // 10 sản phẩm / trang
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$offset = ($page - 1) * $limit;
-$sqlCount = "SELECT COUNT(*) as total FROM Danhmucsp $where";
-
-$totalRow = mysqli_fetch_assoc(mysqli_query($conn, $sqlCount));
-$totalPage = ceil($totalRow['total'] / $limit);
-$sql = "SELECT * FROM Danhmucsp $where LIMIT $limit OFFSET $offset";
-$list= mysqli_query($conn, $sql);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh mục sản phẩm</title>
+    <title>tạo danh mục sản phẩm</title>
+    <link rel="stylesheet" href="taodmsp.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
        <style>
@@ -97,10 +110,6 @@ $list= mysqli_query($conn, $sql);
         #submenuSanPham {
             transition: all 0.3s ease;
         }
-        /* --- 1. Header và Nút chức năng --- */
-        
-
-
     </style>
 </head>
 <body>
@@ -193,83 +202,55 @@ $list= mysqli_query($conn, $sql);
 
     <div class="main-content">
         
-        <div class="header-danh-sach">
-            <h2 class="tieu-de-chinh">Danh mục sản phẩm</h2>
-            <div class="nhom-nut-chuc-nang">
-                <button class="nut nut-nhap-excel"><a href="/quanlykho/taodmsp.php" ><i class="fas fa-plus"></i> Tạo danh mục</a>
+        <div class="dau-trang-form">
+            <div class="khung-tieu-de-chinh">
+               
+                <h1 class="tieu-de-lon">Tạo Danh Mục mới</h1>
             </div>
-        </div>
-        <form method="GET">
-
-
-        <div class="chia2cot">
-            <div >
-                <i class="fas fa-search icon-tim-kiem"></i>
-                <input type="text" name="tkma" value="<?= $ma ?>"placeholder="Tìm kiếm mã" class="input-tim-kiem">
-                
-            </div>
-             <div >
-                <i class="fas fa-search icon-tim-kiem"></i>
-                <input type="text" name="tkten" value="<?= $ten ?>" placeholder="Tìm kiếm tên" class="input-tim-kiem">
-                
-            </div>
-            
-        </div>
-             
-        <button type="submit" name="timkiem">Tìm kiếm</button>
-</form>
-
-      
-        <div class="khung-bang-bao-quanh">
-            <table class="bang-san-pham"> 
-                <thead>
-                    <tr>
-                        
-                        
-                        <th class="cot-sap-xep" data-sort="Madm">Mã DM</th>
-                        <th class="cot-sap-xep" data-sort="Tendm">Tên danh mục</th> 
-                        <th class="cot-sap-xep" data-sort="mota">Mô tả</th>
-                        <th class="cot-hanh-dong-nut">Thao tác</th> 
-                       
-                    </tr>
-                </thead>
-                <tbody>
-                
-                       <?php while ($row = mysqli_fetch_assoc($list)) { ?>
-             <tr>
-                <td><?= $row['Madm'] ?></td>
-                <td><?= $row['Tendm'] ?></td>
-                <td><?= $row['mota'] ?></td>
-                <td class="cot-hanh-dong-nut-td">
-                    <a href="/quanlykho/suadmsp.php?Madm=<?= $row['Madm'] ?>" class="nut-hanh-dong nut-sua" title="Sửa"><i class="fas fa-edit"></i></a>
-                    <a onclick="return confirm('Bạn có chắc muốn xóa danh mục này?');" 
-                    href="/quanlykho/xoadmsp.php?Madm=<?= $row['Madm'] ?>" 
-                    class="nut-hanh-dong nut-xoa" title="Xóa">
-                    <i class="fas fa-trash-alt"></i>
-                    </a>
-                </td>
-            </tr>
-            <?php } ?>
-             
-           
-                    
-                </tbody>
-            </table>
+            <p class="duong-dan">Danh Mục Sản Phẩm &gt; Tạo mới</p>
         </div>
 
-   
+        <div class="noi-dung-chinh-form">
+            <form action="taoncc.php" method="POST">
+                
+                <div class="khung-nhap-lieu thong-tin-co-ban">
+                    <h3 class="tieu-de-khung">Thông tin danh mục</h3>
+
+                    <div class="nhom-truong hai-cot">
+                        <div class="truong-nhap">
+                            <label for="Mancc">Mã nhà cung cấp*</label>
+                            <input type="text" id="Mancc" name="Mancc" placeholder="vd:mcc01" required>
+                        </div>
+                        <div class="truong-nhap">
+                            <label for="Tenncc">Tên nhà cung cấp*</label>
+                            <input type="text" id="Tenncc" name="Tenncc" placeholder="Ví dụ: Công ty ABC" required>
+                        </div>
+                    </div>
+
+                    <div class="nhom-truong hai-cot">
+                        <div class="truong-nhap">
+                            <label for="Sdtncc">Số điện thoại*</label>
+                            <input type="text" id="Sdtncc" name="Sdtncc" placeholder="Ví dụ: 0987654321" required>
+                        </div>
+                        <div class="truong-nhap">
+                            <label for="Diachincc">Địa chỉ*</label>
+                            <input type="text" id="Diachincc" name="Diachincc" placeholder="Ví dụ: 123 Đường ABC, TP. HCM" required>
+                        </div>
+                    </div>
+
+                
+               
+
+                </div>
+
+                <div class="vung-nut-hanh-dong">
+                    <button type="submit" name="btnTaoTiep" class="nut nut-tao-tiep">Tạo & tiếp tục tạo mới</button>
+                    <button type="submit" name="btnTao" class="nut nut-chinh">Tạo</button>
+                    <a href="/quanlykho/Nhacungcap.php" class="nut nut-phu">Quay lại</a>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="pagination-fixed">
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-            <a class="<?= ($i == $page) ? 'active' : '' ?>"
-               href="?page=<?= $i ?>&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>">
-                <?= $i ?>
-            </a>
-        <?php endfor; ?>
-    </div>
-</div>
-
     </div>
     <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {

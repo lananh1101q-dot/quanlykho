@@ -466,8 +466,8 @@ if (!$list) {
                        
 
                         <td>
-                            <a href="suaql.php?ma=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-edit"></i></a>
-                            <a href="xoaql.php?ma=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-trash-alt"></i></a>
+                            <a href="suasp.php?Masp=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-edit"></i></a>
+                            <a href="xoasp.php?Masp=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-trash-alt"></i></a>
                         </td>
                     </tr>
                     <?php endwhile; ?>

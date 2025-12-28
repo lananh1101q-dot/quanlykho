@@ -1,38 +1,62 @@
 <?php
-// Kết nối CSDL
 $conn = mysqli_connect("localhost", "root", "", "quanlykho");
-$ma = "";
-$ten = "";
-$where = " WHERE 1=1 ";
+$sql_danhmuc = "SELECT Madm, Tendm FROM Danhmucsp ORDER BY Tendm ASC";
+$result_danhmuc = mysqli_query($conn, $sql_danhmuc); // Lấy danh mục để hiển thị trong dropdown
 
-if (isset($_GET['timkiem'])) {
-    if (!empty($_GET['tkma'])) {
-        $ma = $_GET['tkma'];
-        $where .= " AND Madm  LIKE '%$ma%'";
-    }
-    if (!empty($_GET['tkten'])) {
-        $ten = $_GET['tkten'];
-        $where .= " AND Tendm LIKE '%$ten%'";
+$Mancc = isset($_GET['Mancc']) ? $_GET['Mancc'] : '';
+
+$sql = "SELECT * FROM Nhacungcap WHERE Mancc = '$Mancc'";
+$result = mysqli_query($conn, $sql);
+$row = mysqli_fetch_assoc($result); // Lấy dữ liệu nhà cung cấp
+if (!$row) {
+    die("Không tìm thấy nhà cung cấp!");
+}
+
+
+// ===============================
+// XỬ LÝ LƯU (BACKEND)
+// ===============================
+if (isset($_POST['btnluu'])) {
+
+    $Mancc   = trim($_POST['Mancc']);
+    $Tenncc  = trim($_POST['Tenncc']);
+  
+    $Sdt   = $_POST['Sdtncc'];
+    $Diachi   = $_POST['Diachincc'];
+   
+
+    // --- Validate backend ---
+    if ($Mancc == "" || $Tenncc == "" || $Sdt == "" || $Diachi == "") {
+        echo "<script>alert('Vui lòng nhập đầy đủ thông tin!');</script>";
+    } 
+    // Kiểm tra số điện thoại có phải là số không 
+    elseif (!is_numeric($Sdt)) {
+        echo "<script>alert('Số điện thoại phải là số!');</script>";
+    } else {
+
+     
+
+            // --- Insert ---
+            $sql = " UPDATE Nhacungcap SET  Tenncc='$Tenncc', Sdtncc='$Sdt', Diachincc='$Diachi'
+                    WHERE Mancc='$Mancc'";
+
+            if (mysqli_query($conn, $sql)) {
+                echo "<script>alert('thông cong!'); window.location.href='Nhacungcap.php';</script>";
+                
+            } else {
+                echo "<script>alert('Lỗi thêm sản phẩm!');</script>";
+            }
+        
     }
 }
-// Phân trang
-$limit = 10; // 10 sản phẩm / trang
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$offset = ($page - 1) * $limit;
-$sqlCount = "SELECT COUNT(*) as total FROM Danhmucsp $where";
-
-$totalRow = mysqli_fetch_assoc(mysqli_query($conn, $sqlCount));
-$totalPage = ceil($totalRow['total'] / $limit);
-$sql = "SELECT * FROM Danhmucsp $where LIMIT $limit OFFSET $offset";
-$list= mysqli_query($conn, $sql);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh mục sản phẩm</title>
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Quản Lý Kho Đơn Giản</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
        <style>
         body { 
@@ -97,10 +121,28 @@ $list= mysqli_query($conn, $sql);
         #submenuSanPham {
             transition: all 0.3s ease;
         }
-        /* --- 1. Header và Nút chức năng --- */
         
 
+        /* 4. Style cho nội dung bên trong */
+        ul { list-style: none; }
+        li a { color: #bdc3c7; text-decoration: none; line-height: 2.5; display: block; }
+        li a:hover { color: #ff4d4d; }
 
+        .row { margin-bottom: 15px; }
+        .row label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .row input, .row select { width: 100%; padding: 10px; border: 1px solid #ccc; }
+        .nut {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+        .btn { background: #ff4d4d; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 10%; font-weight: bold; }
+        .btn:hover { background: #333; }
     </style>
 </head>
 <body>
@@ -192,86 +234,37 @@ $list= mysqli_query($conn, $sql);
     </nav>
 
     <div class="main-content">
+            <h3 style="margin-bottom: 20px;">NHẬP THÔNG TIN VẬT TƯ</h3>
+            <form method="POST">
+            <div class="row">
+                <label>Mã số:</label>
+                <input type="text" name="Mancc" placeholder="Ví dụ: MS01" value="<?php echo $row['Mancc'] ?>" readonly>
+            </div>
+
+            <div class="row">
+                <label>Tên vật tư:</label>
+                <input type="text" name="Tenncc" placeholder="Thép, xi măng..." value="<?php echo $row['Tenncc'] ?>">
+            </div>
         
-        <div class="header-danh-sach">
-            <h2 class="tieu-de-chinh">Danh mục sản phẩm</h2>
-            <div class="nhom-nut-chuc-nang">
-                <button class="nut nut-nhap-excel"><a href="/quanlykho/taodmsp.php" ><i class="fas fa-plus"></i> Tạo danh mục</a>
-            </div>
-        </div>
-        <form method="GET">
 
-
-        <div class="chia2cot">
-            <div >
-                <i class="fas fa-search icon-tim-kiem"></i>
-                <input type="text" name="tkma" value="<?= $ma ?>"placeholder="Tìm kiếm mã" class="input-tim-kiem">
-                
+            <div class="row">
+                <label>Số điện thoại:</label>
+                <input type="text" name="Sdtncc" value="<?php echo $row['Sdtncc'] ?>">
             </div>
-             <div >
-                <i class="fas fa-search icon-tim-kiem"></i>
-                <input type="text" name="tkten" value="<?= $ten ?>" placeholder="Tìm kiếm tên" class="input-tim-kiem">
-                
+              <div class="row">
+                <label>Địa chỉ:</label>
+                <input type="text" name="Diachincc" value="<?php echo $row['Diachincc'] ?>">
             </div>
             
-        </div>
-             
-        <button type="submit" name="timkiem">Tìm kiếm</button>
-</form>
-
-      
-        <div class="khung-bang-bao-quanh">
-            <table class="bang-san-pham"> 
-                <thead>
-                    <tr>
-                        
-                        
-                        <th class="cot-sap-xep" data-sort="Madm">Mã DM</th>
-                        <th class="cot-sap-xep" data-sort="Tendm">Tên danh mục</th> 
-                        <th class="cot-sap-xep" data-sort="mota">Mô tả</th>
-                        <th class="cot-hanh-dong-nut">Thao tác</th> 
-                       
-                    </tr>
-                </thead>
-                <tbody>
-                
-                       <?php while ($row = mysqli_fetch_assoc($list)) { ?>
-             <tr>
-                <td><?= $row['Madm'] ?></td>
-                <td><?= $row['Tendm'] ?></td>
-                <td><?= $row['mota'] ?></td>
-                <td class="cot-hanh-dong-nut-td">
-                    <a href="/quanlykho/suadmsp.php?Madm=<?= $row['Madm'] ?>" class="nut-hanh-dong nut-sua" title="Sửa"><i class="fas fa-edit"></i></a>
-                    <a onclick="return confirm('Bạn có chắc muốn xóa danh mục này?');" 
-                    href="/quanlykho/xoadmsp.php?Madm=<?= $row['Madm'] ?>" 
-                    class="nut-hanh-dong nut-xoa" title="Xóa">
-                    <i class="fas fa-trash-alt"></i>
-                    </a>
-                </td>
-            </tr>
-            <?php } ?>
-             
-           
-                    
-                </tbody>
-            </table>
+           <div class="layout-chia-doi">
+             <a class="nut btn" href="Nhacungcap.php">hủy</a>
+            <button type="submit" name="btnluu" class="nut btn">thay đổi</button>
+            </div>
+            </form>
         </div>
 
-   
     </div>
-    <div class="pagination-fixed">
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-            <a class="<?= ($i == $page) ? 'active' : '' ?>"
-               href="?page=<?= $i ?>&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>">
-                <?= $i ?>
-            </a>
-        <?php endfor; ?>
-    </div>
-</div>
-
-    </div>
-    <script>
+        <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {
     const menu = document.getElementById("submenuSanPham");
     menu.classList.toggle("d-none");
@@ -290,5 +283,8 @@ if (btnPhieuNhap) {
 }
 
 </script>
+
+    
+
 </body>
 </html>
