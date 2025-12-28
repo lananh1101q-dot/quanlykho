@@ -253,7 +253,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
+<<<<<<< HEAD
                   
+=======
+                    <li class="nav-item">
+                        <a class="nav-link" href="quanly_khachhang.php">
+                            <i class="fas fa-users"></i> Quản lý bán hàng
+                        </a>
+                    </li>
+>>>>>>> d3c737c99d5a2024b52f1829559c0774578ab671
                 </ul>
             </li>
 

@@ -1,40 +1,68 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "quanlykho");
-$conn->set_charset("utf8");
-if ($conn->connect_error) die("Lỗi kết nối CSDL");
+session_start();
+require_once __DIR__ . '/db.php';
+$message = "";
 
-// ================= XỬ LÝ XÓA =================
-if (isset($_GET['xoa_hd'])) {
-    $id = $_GET['xoa_hd'];
-    $conn->query("DELETE FROM Phieuxuat WHERE Maxuathang='$id'");
+
+
+/* ========== XÓA PHIẾU XUẤT ========== */
+if (isset($_GET['xoa_px'])) {
+    $stmt = $pdo->prepare("DELETE FROM Phieuxuat WHERE Maxuathang=?");
+    $stmt->execute([$_GET['xoa_px']]);
     header("Location: quanly_banhang.php");
+    exit;
 }
 
+/* ========== XÓA THANH TOÁN ========== */
 if (isset($_GET['xoa_tt'])) {
-    $id = $_GET['xoa_tt'];
-    $conn->query("DELETE FROM Thanhtoan WHERE Matt='$id'");
+    $stmt = $pdo->prepare("DELETE FROM Thanhtoan WHERE Matt=?");
+    $stmt->execute([$_GET['xoa_tt']]);
     header("Location: quanly_banhang.php");
+    exit;
+}
+// ====== LẤY DANH SÁCH KHÁCH ======
+$dsKhach = $pdo->query("SELECT Makh, Tenkh FROM Khachhang")->fetchAll();
+
+/* ========== THÊM PHIẾU XUẤT ========== */
+if (isset($_POST['them_px'])) {
+    try {
+        $stmt = $pdo->prepare(
+            "INSERT INTO Phieuxuat(Maxuathang, Makh, Ngayxuat, Tongtienxuat)
+             VALUES (?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            $_POST['maxuat'],
+            $_POST['makh'],
+            $_POST['ngayxuat'],
+            $_POST['tongtien']
+        ]);
+        $message = "✔ Thêm phiếu xuất thành công";
+    } catch (PDOException $e) {
+        $message = "❌ Lỗi: " . $e->getMessage();
+    }
 }
 
-// ================= THÊM HÓA ĐƠN =================
-if (isset($_POST['them_hd'])) {
-    $conn->query("
-        INSERT INTO Phieuxuat(Maxuathang, Makh, Ngayxuat, Tongtienxuat)
-        VALUES('{$_POST['mahd']}', '{$_POST['makh']}', '{$_POST['ngay']}', '{$_POST['tongtien']}')
-    ");
-}
-
-// ================= THÊM THANH TOÁN =================
+/* ========== THÊM THANH TOÁN ========== */
 if (isset($_POST['them_tt'])) {
-    $conn->query("
-        INSERT INTO Thanhtoan(Maxuathang, Ngaythanhtoan, Sotienthanhtoan, Hinhthuc)
-        VALUES('{$_POST['mahd']}', '{$_POST['ngaytt']}', '{$_POST['sotien']}', '{$_POST['hinhthuc']}')
-    ");
+    try {
+        $stmt = $pdo->prepare(
+            "INSERT INTO Thanhtoan(Maxuathang, Ngaythanhtoan, Sotienthanhtoan, Hinhthuc)
+             VALUES (?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            $_POST['mahd_tt'],
+            $_POST['ngaytt'],
+            $_POST['sotien'],
+            $_POST['hinhthuc']
+        ]);
+        $message = "✔ Thêm thanh toán thành công";
+    } catch (PDOException $e) {
+        $message = "❌ Lỗi: " . $e->getMessage();
+    }
 }
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
 <meta charset="utf-8">
 <title>Quản lý bán hàng</title>
@@ -114,6 +142,7 @@ a{color:red;text-decoration:none}
 input{padding:5px}
     </style>
 </head>
+
 <body>
     <nav class="sidebar">
         <div class="text-center mb-4">
@@ -201,87 +230,171 @@ input{padding:5px}
     <div class="main-content">
 <h2>📊 QUẢN LÝ BÁN HÀNG</h2>
 
-<!-- ================= HÓA ĐƠN ================= -->
-<h3>🧾 Hóa đơn bán</h3>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
+        </li>
 
-<form method="get">
-    <input name="tim_hd" placeholder="Tìm mã HĐ / khách hàng">
-    <button>Tìm</button>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
+                <i class="fas fa-box"></i> Quản lý sản phẩm
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
+                <li class="nav-item"><a class="nav-link" href="Sanpham.php">Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="dmsp.php">Danh mục</a></li>
+                <li class="nav-item"><a class="nav-link" href="Nhacungcap.php">Nhà cung cấp</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
+                <i class="fas fa-file-import"></i> Phiếu nhập kho
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
+                <li class="nav-item"><a class="nav-link" href="danh_sach_phieu_nhap.php">Danh sách</a></li>
+                <li class="nav-item"><a class="nav-link" href="phieu_nhap.php">Tạo phiếu</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                <li class="nav-item"><a class="nav-link" href="quanly_banhang.php">Quản lý bán hàng</a></li>
+                <li class="nav-item"><a class="nav-link" href="tonkho.php">Tồn kho</a></li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </li>
+    </ul>
+</nav>
+
+<!-- ================= MAIN ================= -->
+<main class="main-content">
+<h2 class="mb-3"> Quản Lý Bán Hàng</h2>
+
+<?php if ($message): ?>
+<div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+<?php endif; ?>
+
+<!-- ===== PHIẾU XUẤT ===== -->
+<div class="card mb-4">
+<div class="card-header fw-bold"> Phiếu xuất / Hóa đơn</div>
+<div class="card-body">
+
+<form method="get" class="mb-3 d-flex">
+<input name="tim_px" class="form-control me-2" placeholder="Tìm mã phiếu / khách hàng">
+<button class="btn btn-primary">Tìm</button>
 </form>
 
-<table>
-<tr>
-<th>Mã HĐ</th><th>Ngày</th><th>Khách</th><th>Tổng tiền</th><th>Xóa</th>
+<table class="table table-bordered">
+<tr class="table-light">
+<th>Mã</th><th>Ngày</th><th>Khách</th><th>Tổng tiền</th><th>Xóa</th>
 </tr>
 
 <?php
-$tim = $_GET['tim_hd'] ?? '';
-$sql = "
-SELECT px.*, kh.Tenkh FROM Phieuxuat px
-LEFT JOIN Khachhang kh ON px.Makh=kh.Makh
-WHERE px.Maxuathang LIKE '%$tim%' OR kh.Tenkh LIKE '%$tim%'
-";
-$res = $conn->query($sql);
-while ($r = $res->fetch_assoc()) {
-echo "<tr>
-<td>{$r['Maxuathang']}</td>
-<td>{$r['Ngayxuat']}</td>
-<td>{$r['Tenkh']}</td>
-<td>".number_format($r['Tongtienxuat'])."</td>
-<td><a href='?xoa_hd={$r['Maxuathang']}'>Xóa</a></td>
-</tr>";
-}
+$tim = $_GET['tim_px'] ?? '';
+$stmt = $pdo->prepare(
+"SELECT px.*, kh.Tenkh FROM Phieuxuat px
+ LEFT JOIN Khachhang kh ON px.Makh=kh.Makh
+ WHERE px.Maxuathang LIKE ? OR kh.Tenkh LIKE ?"
+);
+$stmt->execute(["%$tim%","%$tim%"]);
+foreach ($stmt as $r):
 ?>
+<tr>
+<td><?= $r['Maxuathang'] ?></td>
+<td><?= $r['Ngayxuat'] ?></td>
+<td><?= $r['Tenkh'] ?></td>
+<td><?= number_format($r['Tongtienxuat']) ?></td>
+<td>
+<a class="btn btn-sm btn-danger"
+onclick="return confirm('Xóa phiếu xuất?')"
+href="?xoa_px=<?= $r['Maxuathang'] ?>">Xóa</a>
+</td>
+</tr>
+<?php endforeach; ?>
 </table>
 
-<h4>➕ Thêm hóa đơn</h4>
-<form method="post">
-<input name="mahd" placeholder="Mã HĐ" required>
-<input name="makh" placeholder="Mã KH">
-<input type="date" name="ngay">
-<input name="tongtien" placeholder="Tổng tiền">
-<button name="them_hd">Thêm</button>
+<h5 class="mt-3"> Thêm phiếu xuất</h5>
+<form method="post" class="row g-2">
+<input class="col-md-3 form-control" name="maxuat" placeholder="Mã phiếu" required>
+<select class="col-md-3 form-select" name="makh">
+    <option value="">Mã KH</option>
+    <?php foreach ($dsKhach as $kh): ?>
+        <option value="<?= $kh['Makh'] ?>">
+            <?= $kh['Makh'] ?> - <?= $kh['Tenkh'] ?>
+        </option>
+    <?php endforeach; ?>
+</select>
+
+<input class="col-md-3 form-control" type="date" name="ngayxuat">
+<input class="col-md-2 form-control" name="tongtien" placeholder="Tổng tiền">
+<button class="col-md-1 btn btn-success" name="them_px">Thêm</button>
 </form>
 
-<!-- ================= THANH TOÁN ================= -->
-<h3>💳 Lịch sử thanh toán</h3>
+</div>
+</div>
 
-<form method="get">
-<input name="tim_tt" placeholder="Tìm mã HĐ">
-<button>Tìm</button>
+<!-- ===== THANH TOÁN ===== -->
+<div class="card">
+<div class="card-header fw-bold"> Lịch sử thanh toán</div>
+<div class="card-body">
+
+<form method="get" class="mb-3 d-flex">
+<input name="tim_tt" class="form-control me-2" placeholder="Tìm mã hóa đơn">
+<button class="btn btn-primary">Tìm</button>
 </form>
 
-<table>
-<tr>
+<table class="table table-bordered">
+<tr class="table-light">
 <th>ID</th><th>Mã HĐ</th><th>Ngày</th><th>Số tiền</th><th>Hình thức</th><th>Xóa</th>
 </tr>
 
 <?php
 $timtt = $_GET['tim_tt'] ?? '';
-$res = $conn->query("
-SELECT * FROM Thanhtoan 
-WHERE Maxuathang LIKE '%$timtt%'
-");
-while ($r = $res->fetch_assoc()) {
-echo "<tr>
-<td>{$r['Matt']}</td>
-<td>{$r['Maxuathang']}</td>
-<td>{$r['Ngaythanhtoan']}</td>
-<td>".number_format($r['Sotienthanhtoan'])."</td>
-<td>{$r['Hinhthuc']}</td>
-<td><a href='?xoa_tt={$r['Matt']}'>Xóa</a></td>
-</tr>";
-}
+$stmt = $pdo->prepare("SELECT * FROM Thanhtoan WHERE Maxuathang LIKE ?");
+$stmt->execute(["%$timtt%"]);
+foreach ($stmt as $r):
 ?>
+<tr>
+<td><?= $r['Matt'] ?></td>
+<td><?= $r['Maxuathang'] ?></td>
+<td><?= $r['Ngaythanhtoan'] ?></td>
+<td><?= number_format($r['Sotienthanhtoan']) ?></td>
+<td><?= $r['Hinhthuc'] ?></td>
+<td>
+<a class="btn btn-sm btn-danger"
+onclick="return confirm('Xóa thanh toán?')"
+href="?xoa_tt=<?= $r['Matt'] ?>">Xóa</a>
+</td>
+</tr>
+<?php endforeach; ?>
 </table>
 
-<h4>➕ Thêm thanh toán</h4>
-<form method="post">
-<input name="mahd" placeholder="Mã HĐ" required>
-<input type="date" name="ngaytt">
-<input name="sotien" placeholder="Số tiền">
-<input name="hinhthuc" placeholder="Tiền mặt / CK">
-<button name="them_tt">Thêm</button>
+<h5 class="mt-3"> Thêm thanh toán</h5>
+<form method="post" class="row g-2">
+<input class="col-md-3 form-control" name="mahd_tt" placeholder="Mã HĐ" required>
+<input class="col-md-3 form-control" type="date" name="ngaytt">
+<input class="col-md-3 form-control" name="sotien" placeholder="Số tiền">
+<input class="col-md-2 form-control" name="hinhthuc"
+list="dsHinhThuc" placeholder="Hình thức thanh toán">
+<datalist id="dsHinhThuc">
+    <option value="Tiền mặt">
+    <option value="Chuyển khoản">
+    <option value="Ví điện tử">
+</datalist>
+
+<button class="col-md-1 btn btn-success" name="them_tt">Thêm</button>
 </form>
 </div>
 <script>
