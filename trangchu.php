@@ -171,14 +171,18 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
-
-                
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                    <li class="nav-item">
+                        <a class="nav-link" href="quanly_banhang.php">
+                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    
+                  
                 </ul>
             </li>
 
