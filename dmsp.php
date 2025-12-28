@@ -98,7 +98,191 @@ $list= mysqli_query($conn, $sql);
             transition: all 0.3s ease;
         }
         /* --- 1. Header và Nút chức năng --- */
-        
+        /* =========================
+   NỘI DUNG BÊN PHẢI
+========================= */
+
+.main-content {
+    background-color: #f1f3f6;
+    min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.header-danh-sach {
+    background: white;
+    padding: 18px 24px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.tieu-de-chinh {
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* ===== NÚT TẠO DANH MỤC ===== */
+.nhom-nut-chuc-nang a {
+    text-decoration: none;
+    color: white;
+}
+
+.nut-nhap-excel {
+    background: linear-gradient(135deg, #28a745, #218838);
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nut-nhap-excel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(40,167,69,0.4);
+}
+
+/* ===== FORM TÌM KIẾM ===== */
+form {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.chia2cot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.input-tim-kiem {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: all 0.3s;
+}
+
+.input-tim-kiem:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+}
+
+form button[type="submit"] {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+form button[type="submit"]:hover {
+    background: #0056b3;
+}
+
+/* ===== BẢNG ===== */
+.khung-bang-bao-quanh {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.bang-san-pham {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bang-san-pham thead {
+    background: #007bff;
+    color: white;
+}
+
+.bang-san-pham th,
+.bang-san-pham td {
+    padding: 14px 16px;
+    text-align: left;
+}
+
+.bang-san-pham tbody tr {
+    transition: background 0.2s ease;
+}
+
+.bang-san-pham tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.bang-san-pham tbody tr:hover {
+    background: #eef4ff;
+}
+
+/* ===== NÚT THAO TÁC ===== */
+.cot-hanh-dong-nut-td {
+    display: flex;
+    gap: 10px;
+}
+
+.nut-hanh-dong {
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.nut-sua {
+    background: #ffc107;
+}
+
+.nut-sua:hover {
+    background: #e0a800;
+}
+
+.nut-xoa {
+    background: #dc3545;
+}
+
+.nut-xoa:hover {
+    background: #b02a37;
+}
+
+/* ===== PHÂN TRANG ===== */
+.pagination-fixed {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination a {
+    padding: 8px 14px;
+    margin: 0 4px;
+    background: white;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #007bff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s;
+}
+
+.pagination a:hover {
+    background: #007bff;
+    color: white;
+}
+
+.pagination a.active {
+    background: #007bff;
+    color: white;
+    font-weight: 600;
+}
+
 
 
     </style>
