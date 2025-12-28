@@ -349,6 +349,7 @@ if (!$list) {
                             <i class="fas fa-truck"></i> Nhà cung cấp
                         </a>
                     </li>
+                  
                 </ul>
             </li>
 
@@ -381,7 +382,8 @@ if (!$list) {
                 <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
                     <li class="nav-item">
                         <a class="nav-link" href="quanly_banhang.php">
-                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
+                            <i class="fas fa-cash-register"></i> Quản lý bán hàng
+
                         </a>
                     </li>
                     <li class="nav-item">
@@ -494,7 +496,7 @@ document.getElementById("btnSanPham").addEventListener("click", function () {
 });
 document.getElementById("btnBaoCao").addEventListener("click", function () {
     document.getElementById("submenuBaoCao").classList.toggle("d-none");
-});
+});     
 const btnPhieuNhap = document.getElementById("btnPhieuNhap");
 const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
 
