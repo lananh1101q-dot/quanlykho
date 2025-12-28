@@ -139,6 +139,11 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
                             <i class="fas fa-truck"></i> Nhà cung cấp
                         </a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="quanly_banhang.php">
+                            <i class="fas fa-truck"></i> Quản lý bán hàng
+                        </a>
+                    </li>
                 </ul>
             </li>
 
