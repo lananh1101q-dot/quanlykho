@@ -111,6 +111,41 @@ $chiTiet = $chiTiet->fetchAll();
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        /* ===== CHUYỂN DARK -> LIGHT (NỀN TRẮNG) ===== */
+
+/* Card / khung */
+.bg-slate-800,
+.bg-slate-900 {
+    background-color: #ffffff !important;
+}
+
+/* Border */
+.border-slate-700,
+.border-slate-800 {
+    border-color: #dee2e6 !important;
+}
+
+/* Text */
+.text-slate-300,
+.text-slate-400 {
+    color: #6c757d !important;
+}
+
+/* Table header */
+thead.bg-slate-900 {
+    background-color: #f1f3f5 !important;
+}
+
+/* Table row hover */
+tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Nội dung chính */
+.main-content {
+    background-color: #f8f9fa;
+}
+
     </style>
 </head>
 <body>

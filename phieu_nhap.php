@@ -172,6 +172,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        /* ===== ÉP DARK (TAILWIND) -> LIGHT (NỀN TRẮNG) ===== */
+
+/* Nền tổng */
+body {
+    background-color: #f8f9fa !important;
+}
+
+/* Nội dung chính */
+.main-content {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+/* Card / form / box */
+.bg-slate-800,
+.bg-slate-900 {
+    background-color: #ffffff !important;
+}
+
+/* Border */
+.border-slate-700,
+.border-slate-800 {
+    border-color: #dee2e6 !important;
+}
+
+/* Text Tailwind */
+.text-slate-200,
+.text-slate-300,
+.text-slate-400 {
+    color: #495057 !important;
+}
+
+/* Tiêu đề */
+h1, h2, h3, h4, h5 {
+    color: #212529 !important;
+}
+
+/* Input / select / textarea */
+input,
+select,
+textarea {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+/* Placeholder */
+input::placeholder,
+textarea::placeholder {
+    color: #6c757d !important;
+}
+
+/* Table */
+thead.bg-slate-900 {
+    background-color: #f1f3f5 !important;
+    color: #212529 !important;
+}
+
+tbody tr {
+    color: #212529 !important;
+}
+
+tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Ghi chú */
+td.text-slate-400,
+p.text-slate-400 {
+    color: #6c757d !important;
+}
+
+/* Nút dashboard (nền slate) */
+.bg-slate-800.hover\:bg-slate-700:hover {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+}
+
     </style>
 </head>
 <body>
@@ -252,16 +329,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
-                    </li>
-<<<<<<< HEAD
-                  
-=======
-                    <li class="nav-item">
-                        <a class="nav-link" href="quanly_khachhang.php">
-                            <i class="fas fa-users"></i> Quản lý bán hàng
-                        </a>
-                    </li>
->>>>>>> d3c737c99d5a2024b52f1829559c0774578ab671
+
+                 
                 </ul>
             </li>
 

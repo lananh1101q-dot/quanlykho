@@ -230,6 +230,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        /* ===== ÉP DARK MODE -> LIGHT MODE (NỀN TRẮNG) ===== */
+
+/* Card, form, box */
+.bg-slate-800,
+.bg-slate-900 {
+    background-color: #ffffff !important;
+}
+
+/* Nền input, select, textarea */
+.bg-slate-900 {
+    background-color: #ffffff !important;
+}
+
+/* Border */
+.border-slate-700,
+.border-slate-800 {
+    border-color: #ced4da !important;
+}
+
+/* Text */
+.text-slate-200,
+.text-slate-300,
+.text-slate-400 {
+    color: #495057 !important;
+}
+
+/* Table header */
+thead.bg-slate-900 {
+    background-color: #f1f3f5 !important;
+}
+
+/* Hover bảng */
+tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Input chữ màu đen */
+input,
+select,
+textarea {
+    color: #212529 !important;
+    background-color: #ffffff !important;
+}
+
+/* Placeholder */
+input::placeholder,
+textarea::placeholder {
+    color: #6c757d !important;
+}
+
+/* Main content */
+.main-content {
+    background-color: #f8f9fa;
+}
+
     </style>
 </head>
 <body>

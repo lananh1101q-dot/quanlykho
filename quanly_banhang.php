@@ -230,57 +230,11 @@ input{padding:5px}
     <div class="main-content">
 <h2>📊 QUẢN LÝ BÁN HÀNG</h2>
 
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
-                <i class="fas fa-box"></i> Quản lý sản phẩm
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
-                <li class="nav-item"><a class="nav-link" href="Sanpham.php">Sản phẩm</a></li>
-                <li class="nav-item"><a class="nav-link" href="dmsp.php">Danh mục</a></li>
-                <li class="nav-item"><a class="nav-link" href="Nhacungcap.php">Nhà cung cấp</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
-                <i class="fas fa-file-import"></i> Phiếu nhập kho
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
-                <li class="nav-item"><a class="nav-link" href="danh_sach_phieu_nhap.php">Danh sách</a></li>
-                <li class="nav-item"><a class="nav-link" href="phieu_nhap.php">Tạo phiếu</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                <li class="nav-item"><a class="nav-link" href="quanly_banhang.php">Quản lý bán hàng</a></li>
-                <li class="nav-item"><a class="nav-link" href="tonkho.php">Tồn kho</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-        </li>
-    </ul>
-</nav>
+   
 
 <!-- ================= MAIN ================= -->
-<main class="main-content">
-<h2 class="mb-3"> Quản Lý Bán Hàng</h2>
+
+
 
 <?php if ($message): ?>
 <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
