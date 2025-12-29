@@ -187,9 +187,9 @@ if (isset($_POST['btnluu'])) {
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+              <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
                     <li class="nav-item">
-                        <a class="nav-link" href="baocao_banhang.php">
+                        <a class="nav-link" href="quanly_banhang.php">
                             <i class="fas fa-cash-register"></i> Báo cáo bán hàng
                         </a>
                     </li>
@@ -198,11 +198,7 @@ if (isset($_POST['btnluu'])) {
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 

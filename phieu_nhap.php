@@ -135,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 4px 10px;
             transition: all 0.3s ease;
             font-weight: normal; /* Chữ bình thường mặc định */
+          
         }
         
         /* CHỈ hover mới in đậm và nổi bật */
@@ -172,6 +173,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        /* ===== PHIẾU NHẬP NỀN TRẮNG – CHỮ ĐEN ===== */
+
+/* Khung form */
+.main-content .bg-slate-800 {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Tiêu đề, chữ */
+.main-content h1,
+.main-content label,
+.main-content p,
+.main-content .text-slate-200,
+.main-content .text-slate-300,
+.main-content .text-slate-400 {
+    color: #000000 !important;
+}
+
+/* Input, select, textarea */
+.main-content input,
+.main-content select,
+.main-content textarea {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ced4da !important;
+}
+
+/* Table */
+.main-content table {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.main-content thead {
+    background-color: #f1f3f5 !important;
+    color: #000000 !important;
+}
+
+.main-content tbody tr {
+    background-color: #ffffff !important;
+}
+
+.main-content tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Nút xóa */
+.main-content button.text-red-400 {
+    color: #dc3545 !important;
+}
+
     </style>
 </head>
 <body>
@@ -234,10 +286,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
+               <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                    <li class="nav-item">
+                        <a class="nav-link" href="quanly_banhang.php">
+                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
+                        </a>    
+                    </li>
+                    
                 <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
                     <li class="nav-item">
                         <a class="nav-link" href="quanly_banhang.php">
                             <i class="fas fa-cash-register"></i> Quản lý bán hàng
+
                         </a>
                     </li>
                     <li class="nav-item">
@@ -245,11 +305,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
+<<<<<<< HEAD
+                  
+=======
                     <li class="nav-item">
                         <a class="nav-link" href="quanly_khachhang.php">
                             <i class="fas fa-users"></i> Quản lý bán hàng
                         </a>
                     </li>
+>>>>>>> d3c737c99d5a2024b52f1829559c0774578ab671
                 </ul>
             </li>
 
