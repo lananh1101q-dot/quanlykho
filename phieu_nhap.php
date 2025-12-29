@@ -135,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 4px 10px;
             transition: all 0.3s ease;
             font-weight: normal; /* Chữ bình thường mặc định */
+          
         }
         
         /* CHỈ hover mới in đậm và nổi bật */
