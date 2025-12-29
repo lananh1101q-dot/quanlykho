@@ -328,7 +328,7 @@ input{padding:5px}
 
 
 <!-- ================= MAIN ================= -->
-<main class="main-content">
+
 <h2 class="mb-3"> Quản Lý Bán Hàng</h2>
 
 <?php if ($message): ?>
@@ -556,7 +556,6 @@ name="<?= $edit_ct ? 'capnhat_ct' : 'them_ct' ?>">
 </div>
 
 
-</main>
 
 <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {
