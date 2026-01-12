@@ -190,6 +190,9 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
             <li class="nav-item">
                 <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
             </li>
+               <li class="nav-item">
+                <a class="nav-link" href="loaikhachhang.php"><i class="fas fa-users"></i> Loại khách hàng</a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             </li>

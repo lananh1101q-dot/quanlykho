@@ -187,6 +187,77 @@ $error = $_GET['error'] ?? '';
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        /* ===== DARK -> LIGHT (NỀN TRẮNG, CHỮ ĐEN) ===== */
+
+/* Nền tổng */
+body {
+    background-color: #f8f9fa !important;
+}
+
+/* Nội dung chính */
+.main-content {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+/* Card / form / box */
+.bg-slate-800,
+.bg-slate-900 {
+    background-color: #ffffff !important;
+}
+
+/* Border */
+.border-slate-700,
+.border-slate-800 {
+    border-color: #dee2e6 !important;
+}
+
+/* Text Tailwind */
+.text-slate-200,
+.text-slate-300,
+.text-slate-400 {
+    color: #495057 !important;
+}
+
+/* Tiêu đề */
+h1, h2, h3, h4, h5 {
+    color: #212529 !important;
+}
+
+/* Input / select / textarea */
+input,
+select,
+textarea {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+/* Placeholder */
+input::placeholder,
+textarea::placeholder {
+    color: #6c757d !important;
+}
+
+/* Table */
+thead.bg-slate-900 {
+    background-color: #f1f3f5 !important;
+    color: #212529 !important;
+}
+
+tbody tr {
+    color: #212529 !important;
+}
+
+tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Ghi chú trong bảng */
+td.text-slate-400 {
+    color: #6c757d !important;
+}
+
+
     </style>
 </head>
 <body>
@@ -282,7 +353,7 @@ $error = $_GET['error'] ?? '';
       </div>
       <div class="flex gap-2 text-sm">
         <a href="phieu_nhap.php" class="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 font-semibold">+ Tạo phiếu nhập</a>
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
+        <a href="danh_sach_phieu_nhap.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
         <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
       </div>
     </div>

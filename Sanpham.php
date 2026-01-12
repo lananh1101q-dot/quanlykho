@@ -465,7 +465,12 @@ if (!$list) {
 
                         <td>
                             <a href="suasp.php?Masp=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-edit"></i></a>
-                            <a href="xoasp.php?Masp=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-trash-alt"></i></a>
+                          
+                        <a class="nut-hanh-dong"
+                           onclick="return confirm('Bạn có chắc muốn xóa?');"
+                           href="xoasp.php?Masp=<?= $row['Masp'] ?>">
+                            <i class="fas fa-trash"></i>
+                        </a>
                         </td>
                     </tr>
                     <?php endwhile; ?>
