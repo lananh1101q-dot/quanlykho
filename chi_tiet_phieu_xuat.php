@@ -218,45 +218,45 @@ $chiTiet = $chiTiet->fetchAll();
         <p class="text-slate-400 text-sm mt-1">Mã phiếu: <?= htmlspecialchars($phieuXuat['Maxuathang']) ?></p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="sua_phieu_xuat.php?id=<?= urlencode($phieuXuat['Maxuathang']) ?>" class="px-3 py-2 rounded bg-blue-600 hover:bg-blue-700 font-semibold">Sửa</a>
-        <a href="danh_sach_phieu_xuat.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Danh sách</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
+        <a href="sua_phieu_xuat.php?id=<?= urlencode($phieuXuat['Maxuathang']) ?>" class="px-3 py-2 rounded bg-white-600 hover:bg-blue-700 font-white">Sửa</a>
+        <a href="danh_sach_phieu_xuat.php" class="px-3 py-2 rounded bg-white-800 hover:bg-white-700"></a>
+        <a href="logout.php" class="px-3 py-2 rounded bg-white-600 hover:bg-white-700"></a>
       </div>
     </div>
 
-    <div class="bg-slate-800 rounded-lg p-5 space-y-4">
+    <div class="bg-white-800 rounded-lg p-5 space-y-4">
       <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Mã phiếu xuất</label>
+          <label class="block text-sm text-black-400 mb-1">Mã phiếu xuất</label>
           <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Maxuathang']) ?></div>
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Mã khách hàng</label>
+          <label class="block text-sm text-black-400 mb-1">Mã khách hàng</label>
           <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Makh']) ?></div>
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Ngày xuất</label>
-          <div class="text-lg"><?= date('d/m/Y', strtotime($phieuXuat['Ngayxuathang'])) ?></div>
+          <label class="block text-sm text-black-400 mb-1">Ngày xuất</label>
+          <div class="text-lg"><?= date('d/m/Y', strtotime($phieuXuat['Ngayxuat'])) ?></div>
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Thành tiền</label>
-          <div class="text-2xl font-bold text-emerald-400"><?= number_format($phieuXuat['Tongtiennhap'], 0, ',', '.') ?> đ</div>
+          <label class="block text-sm text-black-400 mb-1">Thành tiền</label>
+          <div class="text-2xl font-bold text-emerald-400"><?= number_format($phieuXuat['Tongtienxuat'], 0, ',', '.') ?> đ</div>
         </div>
-        <?php if ($phieuNhap['Ghichu']): ?>
+        <?php if ($phieuXuat['Ghichu']): ?>
           <div class="md:col-span-2">
-            <label class="block text-sm text-slate-400 mb-1">Ghi chú</label>
-            <div class="text-slate-300"><?= nl2br(htmlspecialchars($phieuXuat['Ghichu'])) ?></div>
+            <label class="block text-sm text-black-400 mb-1">Ghi chú</label>
+            <div class="text-black-300"><?= nl2br(htmlspecialchars($phieuXuat['Ghichu'])) ?></div>
           </div>
         <?php endif; ?>
       </div>
     </div>
 
-    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-auto">
-      <div class="p-4 border-b border-slate-700">
+    <div class="bg-white-800 rounded-lg border border-white-700 overflow-auto">
+      <div class="p-4 border-b border-white-700">
         <h2 class="text-lg font-semibold">Chi tiết sản phẩm</h2>
       </div>
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-900 text-slate-300">
+        <thead class="bg-white-900 text-black-300">
           <tr>
             <th class="px-4 py-3 text-left">STT</th>
             <th class="px-4 py-3 text-left">Mã SP</th>
@@ -269,7 +269,7 @@ $chiTiet = $chiTiet->fetchAll();
         </thead>
         <tbody>
           <?php if (empty($chiTiet)): ?>
-            <tr><td colspan="7" class="px-4 py-4 text-center text-slate-400">Không có chi tiết.</td></tr>
+            <tr><td colspan="7" class="px-4 py-4 text-center text-black-400">Không có chi tiết.</td></tr>
           <?php else: ?>
             <?php $stt = 1; foreach ($chiTiet as $ct): ?>
               <tr class="border-t border-slate-800">
@@ -282,7 +282,7 @@ $chiTiet = $chiTiet->fetchAll();
                 <td class="px-4 py-2 text-right font-semibold"><?= number_format($ct['Thanhtien'], 0, ',', '.') ?> đ</td>
               </tr>
             <?php endforeach; ?>
-            <tr class="border-t-2 border-slate-700 bg-slate-900">
+            <tr class="border-t-2 border-gray-700 bg-gray-900">
               <td colspan="6" class="px-4 py-3 text-right font-semibold">Tổng cộng:</td>
               <td class="px-4 py-3 text-right font-bold text-lg text-emerald-400"><?= number_format($phieuXuat['Tongtienxuat'], 0, ',', '.') ?> đ</td>
             </tr>

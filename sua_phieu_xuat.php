@@ -8,162 +8,209 @@ require_once __DIR__ . '/db.php';
 
 $errors = [];
 $success = '';
-$manhap = $_GET['id'] ?? '';
+$maxuat = $_GET['id'] ?? '';
 
-if (empty($manhap)) {
-    header('Location: danh_sach_phieu_nhap.php');
+if (empty($maxuat)) {
+    header('Location: danh_sach_phieu_xuat.php');
     exit;
 }
 
-// Lấy dữ liệu dropdown
-$nhacungcaps = $pdo->query("SELECT Mancc, Tenncc FROM Nhacungcap ORDER BY Tenncc")->fetchAll();
-$sanphams = $pdo->query("SELECT Masp, Tensp, Dvt FROM Sanpham ORDER BY Tensp")->fetchAll();
-$khos = $pdo->query("SELECT Makho, Tenkho FROM Kho ORDER BY Tenkho")->fetchAll();
+// Lấy dữ liệu dropdown cho PHIẾU XUẤT
+$khachhangs = $pdo->query("
+    SELECT Makh, Tenkh 
+    FROM Khachhang 
+    ORDER BY Tenkh
+")->fetchAll();
 
-// Lấy thông tin phiếu nhập hiện tại
-$phieuNhap = $pdo->prepare("SELECT * FROM Phieunhap WHERE Manhaphang = ?");
-$phieuNhap->execute([$manhap]);
-$phieuNhap = $phieuNhap->fetch();
+$sanphams = $pdo->query("
+    SELECT Masp, Tensp, Dvt, Giaban 
+    FROM Sanpham 
+    ORDER BY Tensp
+")->fetchAll();
 
-if (!$phieuNhap) {
-    header('Location: danh_sach_phieu_nhap.php?error=Phiếu nhập không tồn tại');
+$khos = $pdo->query("
+    SELECT Makho, Tenkho 
+    FROM Kho 
+    ORDER BY Tenkho
+")->fetchAll();
+$phieuXuat = $pdo->prepare("
+    SELECT * 
+    FROM Phieuxuat 
+    WHERE Maxuathang = ?
+");
+$phieuXuat->execute([$maxuat]);
+$phieuXuat = $phieuXuat->fetch();
+
+if (!$phieuXuat) {
+    header('Location: danh_sach_phieu_xuat.php?error=Phiếu xuất không tồn tại');
     exit;
 }
+$chiTiet = $pdo->prepare("
+    SELECT ct.*, sp.Tensp, sp.Dvt
+    FROM Chitiet_Phieuxuat ct
+    JOIN Sanpham sp ON ct.Masp = sp.Masp
+    WHERE ct.Maxuathang = ?
+");
+$chiTiet->execute([$maxuat]);
+$chiTietPhieu = $chiTiet->fetchAll();
 
-// Lấy chi tiết phiếu nhập hiện tại
-$chiTietCu = $pdo->prepare("SELECT * FROM Chitiet_Phieunhap WHERE Manhaphang = ?");
-$chiTietCu->execute([$manhap]);
-$chiTietCu = $chiTietCu->fetchAll();
 
-// Lấy Makho từ phiếu nhập
-$makhoCu = $phieuNhap['Makho'] ?? '';
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $manhapNew = trim($_POST['manhaphang'] ?? '');
-    $mancc = trim($_POST['mancc'] ?? '');
-    $makho = trim($_POST['makho'] ?? '');
-    $ngaynhap = $_POST['ngaynhap'] ?? '';
+
+    // ====== THÔNG TIN PHIẾU XUẤT ======
+    $maxuat = trim($_POST['maxuathang'] ?? '');
+    $makh = trim($_POST['makh'] ?? '');
+    $ngayxuat = $_POST['ngayxuat'] ?? '';
     $ghichu = trim($_POST['ghichu'] ?? '');
+
+    // ====== CHI TIẾT ======
     $maspArr = $_POST['masp'] ?? [];
     $soluongArr = $_POST['soluong'] ?? [];
     $dongiaArr = $_POST['dongia'] ?? [];
 
-    if ($manhapNew === '' || $mancc === '' || $makho === '' || $ngaynhap === '') {
-        $errors[] = 'Vui lòng nhập đầy đủ Mã nhập, Nhà cung cấp, Kho, Ngày nhập.';
+    // ====== KIỂM TRA BẮT BUỘC ======
+    if ($maxuat === '' || $makh === '' || $ngayxuat === '') {
+        $errors[] = 'Vui lòng nhập đầy đủ Mã xuất, Khách hàng, Ngày xuất.';
     }
 
-    // Chuẩn hóa item
+    // ====== CHUẨN HÓA CHI TIẾT ======
     $items = [];
     for ($i = 0; $i < count($maspArr); $i++) {
         $masp = trim($maspArr[$i] ?? '');
         $soluong = (int)($soluongArr[$i] ?? 0);
         $dongia = (float)($dongiaArr[$i] ?? 0);
+
         if ($masp === '' || $soluong <= 0 || $dongia <= 0) {
             continue;
         }
+
         $items[] = [
-            'masp' => $masp,
+            'masp'    => $masp,
             'soluong' => $soluong,
-            'dongia' => $dongia,
+            'dongia'  => $dongia,
         ];
     }
 
     if (empty($items)) {
-        $errors[] = 'Cần ít nhất một dòng chi tiết hợp lệ.';
+        $errors[] = 'Cần ít nhất một dòng sản phẩm hợp lệ.';
     }
+
+    // === PHẦN XỬ LÝ DB (BEGIN TRANSACTION) VIẾT TIẾP Ở DƯỚI ===
+
 
     if (!$errors) {
-        try {
-            $pdo->beginTransaction();
+    try {
+        $pdo->beginTransaction();
 
-            // 1. Hoàn trả số lượng tồn kho cũ (nếu có Makho cũ)
-            if ($makhoCu) {
-                foreach ($chiTietCu as $ctCu) {
-                    $stmtHoanTra = $pdo->prepare("
-                        UPDATE Tonkho 
-                        SET Soluongton = Soluongton - :sl
-                        WHERE Makho = :makho AND Masp = :masp AND Soluongton >= :sl_check
-                    ");
-                    $stmtHoanTra->execute([
-                        ':makho' => $makhoCu,
-                        ':masp' => $ctCu['Masp'],
-                        ':sl' => $ctCu['Soluong'],
-                        ':sl_check' => $ctCu['Soluong'],
-                    ]);
-                }
-            }
+        /* ===== 1. HOÀN TRẢ TỒN KHO CŨ ===== */
+        foreach ($chiTietPhieu as $ctCu) {
+            $stmtHoan = $pdo->prepare("
+                UPDATE Tonkho
+                SET Soluongton = Soluongton + :sl
+                WHERE Masp = :masp
+            ");
+            $stmtHoan->execute([
+                ':masp' => $ctCu['Masp'],
+                ':sl'   => $ctCu['Soluong'],
+            ]);
+        }
 
-            // 2. Xóa chi tiết cũ
-            $pdo->prepare("DELETE FROM Chitiet_Phieunhap WHERE Manhaphang = ?")->execute([$manhap]);
+        /* ===== 2. XÓA CHI TIẾT PHIẾU XUẤT CŨ ===== */
+        $pdo->prepare("
+            DELETE FROM Chitiet_Phieuxuat 
+            WHERE Maxuathang = ?
+        ")->execute([$maxuat]);
 
-            // 3. Tính tổng mới
-            $tong = 0;
-            foreach ($items as $it) {
-                $tong += $it['soluong'] * $it['dongia'];
-            }
+        /* ===== 3. TÍNH TỔNG TIỀN MỚI ===== */
+        $tong = 0;
+        foreach ($items as $it) {
+            $tong += $it['soluong'] * $it['dongia'];
+        }
 
-            // 4. Cập nhật phiếu nhập
-            $stmtPhieu = $pdo->prepare("UPDATE Phieunhap SET Manhaphang = :manew, Mancc = :ncc, Makho = :makho, Ngaynhaphang = :ngay, Tongtiennhap = :tong, Ghichu = :ghichu WHERE Manhaphang = :macu");
-            $stmtPhieu->execute([
-                ':manew' => $manhapNew,
-                ':ncc' => $mancc,
-                ':makho' => $makho,
-                ':ngay' => $ngaynhap,
-                ':tong' => $tong,
-                ':ghichu' => $ghichu,
-                ':macu' => $manhap,
+        /* ===== 4. CẬP NHẬT PHIẾU XUẤT ===== */
+        $stmtPhieu = $pdo->prepare("
+            UPDATE Phieuxuat
+            SET Maxuathang = :manew,
+                Makh = :makh,
+                Ngayxuat = :ngay,
+                Tongtienxuat = :tong,
+                Ghichu = :ghichu
+            WHERE Maxuathang = :macu
+        ");
+        $stmtPhieu->execute([
+            ':manew' => $maxuat,
+            ':makh'  => $makh,
+            ':ngay'  => $ngayxuat,
+            ':tong'  => $tong,
+            ':ghichu'=> $ghichu,
+            ':macu'  => $maxuat,
+        ]);
+
+        /* ===== 5. THÊM CHI TIẾT MỚI + TRỪ TỒN ===== */
+        $stmtCt = $pdo->prepare("
+            INSERT INTO Chitiet_Phieuxuat
+                (Maxuathang, Masp, Soluong, Dongiaxuat)
+            VALUES
+                (:ma, :masp, :sl, :dg)
+        ");
+
+        $stmtTru = $pdo->prepare("
+            UPDATE Tonkho
+            SET Soluongton = Soluongton - :sl
+            WHERE Masp = :masp AND Soluongton >= :sl
+        ");
+
+        foreach ($items as $it) {
+            // thêm chi tiết
+            $stmtCt->execute([
+                ':ma'   => $maxuat,
+                ':masp' => $it['masp'],
+                ':sl'   => $it['soluong'],
+                ':dg'   => $it['dongia'],
             ]);
 
-            // 5. Thêm chi tiết mới và cập nhật tồn kho
-            $stmtCt = $pdo->prepare("INSERT INTO Chitiet_Phieunhap (Manhaphang, Masp, Soluong, Dongianhap) VALUES (:ma, :masp, :sl, :dg)");
-            foreach ($items as $it) {
-                $stmtCt->execute([
-                    ':ma' => $manhapNew,
-                    ':masp' => $it['masp'],
-                    ':sl' => $it['soluong'],
-                    ':dg' => $it['dongia'],
-                ]);
-                
-                // Cập nhật tồn kho
-                $stmtTonkho = $pdo->prepare("
-                    INSERT INTO Tonkho (Makho, Masp, Soluongton) 
-                    VALUES (:makho, :masp, :sl)
-                    ON DUPLICATE KEY UPDATE Soluongton = Soluongton + :sl_update
-                ");
-                $stmtTonkho->execute([
-                    ':makho' => $makho,
-                    ':masp' => $it['masp'],
-                    ':sl' => $it['soluong'],
-                    ':sl_update' => $it['soluong'],
-                ]);
-            }
+            // trừ tồn kho
+            $stmtTru->execute([
+                ':masp' => $it['masp'],
+                ':sl'   => $it['soluong'],
+            ]);
 
-            $pdo->commit();
-            header("Location: danh_sach_phieu_nhap.php?success=sua");
-            exit;
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            $errors[] = 'Lỗi khi cập nhật phiếu: ' . htmlspecialchars($e->getMessage());
+            if ($stmtTru->rowCount() === 0) {
+                throw new Exception("Không đủ tồn kho cho sản phẩm {$it['masp']}");
+            }
         }
+
+        $pdo->commit();
+        header("Location: danh_sach_phieu_xuat.php?success=sua");
+        exit;
+
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        $errors[] = 'Lỗi khi cập nhật phiếu xuất: ' . $e->getMessage();
     }
-} else {
-    // Hiển thị dữ liệu hiện tại
-    $_POST['manhaphang'] = $phieuNhap['Manhaphang'];
-    $_POST['mancc'] = $phieuNhap['Mancc'];
-    $_POST['makho'] = $phieuNhap['Makho'] ?? '';
-    $_POST['ngaynhap'] = $phieuNhap['Ngaynhaphang'];
-    $_POST['ghichu'] = $phieuNhap['Ghichu'];
-    $_POST['masp'] = array_column($chiTietCu, 'Masp');
-    $_POST['soluong'] = array_column($chiTietCu, 'Soluong');
-    $_POST['dongia'] = array_column($chiTietCu, 'Dongianhap');
 }
+
+} else {
+    // Hiển thị dữ liệu hiện tại của PHIẾU XUẤT
+    $_POST['maxuathang'] = $phieuXuat['Maxuathang'];
+    $_POST['makh']       = $phieuXuat['Makh'];
+    $_POST['ngayxuat']   = $phieuXuat['Ngayxuat'];
+    $_POST['ghichu']     = $phieuXuat['Ghichu'];
+
+    $_POST['masp']    = array_column($chiTietPhieu, 'Masp');
+    $_POST['soluong'] = array_column($chiTietPhieu, 'Soluong');
+    $_POST['dongia']  = array_column($chiTietPhieu, 'Dongiaxuat');
+}
+
 ?>
 <!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sửa phiếu nhập kho</title>
+  <title>Sửa phiếu xuất kho</title>
   <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -324,12 +371,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="max-w-5xl mx-auto p-6 space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold">Sửa phiếu nhập kho</h1>
-        <p class="text-slate-400 text-sm mt-1">Cập nhật thông tin phiếu nhập</p>
+        <h1 class="text-2xl font-bold">Sửa phiếu xuất kho</h1>
+        <p class="text-slate-400 text-sm mt-1">Cập nhật thông tin phiếu xuất</p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="danh_sach_phieu_nhap.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Danh sách</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
+   <a href="danh_sach_phieu_xuat.php" class="px-3 py-2 rounded bg-white-800 hover:bg-white-700">← Danh sách</a>
       </div>
     </div>
 
@@ -343,55 +389,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     <?php endif; ?>
 
-    <form method="post" class="bg-slate-800 rounded-lg p-5 space-y-4">
+    <form method="post" class="bg-white-800 rounded-lg p-5 space-y-4">
       <div class="grid md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm text-slate-300 mb-2">Mã nhập hàng *</label>
-          <input name="manhaphang" required class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" value="<?= htmlspecialchars($_POST['manhaphang'] ?? '') ?>" />
+          <label class="block text-sm text-black-300 mb-2">Mã xuất hàng *</label>
+          <input name="maxuathang" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" value="<?= htmlspecialchars($_POST['maxuathang'] ?? '') ?>" />
         </div>
         <div>
-          <label class="block text-sm text-slate-300 mb-2">Nhà cung cấp *</label>
-          <select name="mancc" required class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
+          <label class="block text-sm text-black-300 mb-2">Khách hàng *</label>
+          <select name="mankh" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
             <option value="">-- Chọn --</option>
-            <?php foreach ($nhacungcaps as $ncc): ?>
-              <option value="<?= htmlspecialchars($ncc['Mancc']) ?>" <?= (($_POST['mancc'] ?? '') === $ncc['Mancc']) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($ncc['Tenncc']) ?>
+            <?php foreach ($khachhangs as $kh): ?>
+              <option value="<?= htmlspecialchars($kh['Makh']) ?>" <?= (($_POST['makh'] ?? '') === $kh['Makh']) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($kh['Tenkh']) ?>
               </option>
             <?php endforeach; ?>
           </select>
         </div>
-        <div>
-          <label class="block text-sm text-slate-300 mb-2">Kho nhập *</label>
-          <select name="makho" required class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
-            <option value="">-- Chọn kho --</option>
-            <?php foreach ($khos as $kho): ?>
-              <option value="<?= htmlspecialchars($kho['Makho']) ?>" <?= (($_POST['makho'] ?? '') === $kho['Makho']) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($kho['Tenkho']) ?> [<?= htmlspecialchars($kho['Makho']) ?>]
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+        
       </div>
       <div class="grid md:grid-cols-1 gap-4">
         <div>
-          <label class="block text-sm text-slate-300 mb-2">Ngày nhập *</label>
-          <input type="date" name="ngaynhap" required class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" value="<?= htmlspecialchars($_POST['ngaynhap'] ?? date('Y-m-d')) ?>" />
+          <label class="block text-sm text-black-300 mb-2">Ngày xuất *</label>
+          <input type="date" name="ngayxuat" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" value="<?= htmlspecialchars($_POST['ngayxuat'] ?? date('Y-m-d')) ?>" />
         </div>
       </div>
 
       <div>
-        <label class="block text-sm text-slate-300 mb-2">Ghi chú</label>
-        <textarea name="ghichu" rows="3" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"><?= htmlspecialchars($_POST['ghichu'] ?? '') ?></textarea>
+        <label class="block text-sm text-black-300 mb-2">Ghi chú</label>
+        <textarea name="ghichu" rows="3" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700"><?= htmlspecialchars($_POST['ghichu'] ?? '') ?></textarea>
       </div>
 
       <div class="space-y-2">
         <div class="flex items-center justify-between">
-          <div class="text-slate-200 font-semibold">Chi tiết sản phẩm</div>
+          <div class="text-black-200 font-semibold">Chi tiết sản phẩm</div>
           <button type="button" onclick="addRow()" class="px-3 py-1 rounded bg-sky-600 hover:bg-sky-700 text-sm font-semibold">+ Thêm dòng</button>
         </div>
-        <div class="overflow-auto border border-slate-700 rounded">
+        <div class="overflow-auto border border-white-700 rounded">
           <table class="min-w-full text-sm">
-            <thead class="bg-slate-900 text-slate-300">
+            <thead class="bg-white-900 text-white-300">
               <tr>
                 <th class="px-3 py-2 text-left">Sản phẩm</th>
                 <th class="px-3 py-2 text-left">Số lượng</th>
@@ -410,7 +446,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               ?>
               <tr class="border-t border-slate-800">
                 <td class="px-3 py-2">
-                  <select name="masp[]" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
+                  <select name="masp[]" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
                     <option value="">-- Chọn --</option>
                     <?php foreach ($sanphams as $sp): ?>
                       <option value="<?= htmlspecialchars($sp['Masp']) ?>" <?= ($maspVal === $sp['Masp']) ? 'selected' : '' ?>>
@@ -419,8 +455,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endforeach; ?>
                   </select>
                 </td>
-                <td class="px-3 py-2"><input name="soluong[]" type="number" min="1" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" value="<?= htmlspecialchars($slVal) ?>" /></td>
-                <td class="px-3 py-2"><input name="dongia[]" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" value="<?= htmlspecialchars($dgVal) ?>" /></td>
+                <td class="px-3 py-2"><input name="soluong[]" type="number" min="1" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" value="<?= htmlspecialchars($slVal) ?>" /></td>
+                <td class="px-3 py-2"><input name="dongia[]" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" value="<?= htmlspecialchars($dgVal) ?>" /></td>
                 <td class="px-3 py-2 text-right"><button type="button" onclick="removeRow(this)" class="text-red-400 hover:text-red-200">Xóa</button></td>
               </tr>
               <?php endfor; ?>
@@ -489,6 +525,14 @@ const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
 if (btnPhieuNhap) {
     btnPhieuNhap.addEventListener("click", function () {
         submenuPhieuNhap.classList.toggle("d-none");
+    });
+}
+const btnPhieuXuat = document.getElementById("btnPhieuXuat");
+const submenuPhieuXuat = document.getElementById("submenuPhieuXuat");
+
+if (btnPhieuXuat) {
+    btnPhieuXuat.addEventListener("click", function () {
+        submenuPhieuXuat.classList.toggle("d-none");
     });
 }
 

@@ -309,9 +309,9 @@ $error = $_GET['error'] ?? '';
         <p class="text-slate-400 text-sm mt-1">Quản lý các phiếu xuất kho</p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="phieu_nhap.php" class="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 font-semibold">+ Tạo phiếu nhập</a>
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">←Trở về</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
+        <a href="phieu_xuat.php" class="px-4 py-2 rounded bg-white-600 hover:bg-white-700 font-semibold"></a>
+        <a href="dashboard.php" class="px-3 py-2 rounded bg-white-800 hover:bg-white-700"></a>
+        <a href="logout.php" class="px-3 py-2 rounded bg-white-600 hover:bg-white-700"></a>
       </div>
     </div>
 
@@ -328,22 +328,22 @@ $error = $_GET['error'] ?? '';
     <?php endif; ?>
 
     <!-- Form tìm kiếm -->
-<form method="get" class="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-3 text-sm">
+<form method="get" class="bg-white-800 border border-white-700 rounded-lg p-4 space-y-3 text-sm">
   <div class="grid md:grid-cols-5 gap-3">
 
     <!-- Mã phiếu xuất -->
     <div>
-      <label class="block text-slate-300 mb-1">Mã phiếu xuất</label>
+      <label class="block text-black-300 mb-1">Mã phiếu xuất</label>
       <input name="ma"
              value="<?= htmlspecialchars($maSearch) ?>"
-             class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700"
              placeholder="Nhập mã phiếu xuất..." />
     </div>
 
     <!-- Khách hàng -->
     <div>
-      <label class="block text-slate-300 mb-1">Khách hàng</label>
-      <select name="makh" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
+      <label class="block text-black-300 mb-1">Khách hàng</label>
+      <select name="makh" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
         <option value="">-- Tất cả --</option>
         <?php foreach ($khachhangs as $kh): ?>
           <option value="<?= $kh['Makh'] ?>"
@@ -356,47 +356,47 @@ $error = $_GET['error'] ?? '';
 
     <!-- Mã sản phẩm -->
     <div>
-      <label class="block text-slate-300 mb-1">Mã sản phẩm</label>
+      <label class="block text-black-300 mb-1">Mã sản phẩm</label>
       <input name="masp"
              value="<?= htmlspecialchars($spSearch) ?>"
-             class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700"
              placeholder="Nhập mã sản phẩm..." />
     </div>
 
     <!-- Từ ngày -->
     <div>
-      <label class="block text-slate-300 mb-1">Từ ngày</label>
+      <label class="block text-black-300 mb-1">Từ ngày</label>
       <input type="date" name="from"
              value="<?= htmlspecialchars($dateFrom) ?>"
-             class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" />
     </div>
 
     <!-- Đến ngày -->
     <div>
-      <label class="block text-slate-300 mb-1">Đến ngày</label>
+      <label class="block text-black-300 mb-1">Đến ngày</label>
       <input type="date" name="to"
              value="<?= htmlspecialchars($dateTo) ?>"
-             class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" />
     </div>
 
   </div>
 
   <div class="flex items-center gap-2 pt-1">
     <button type="submit"
-            class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-slate-900 font-semibold">
+            class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white-900 font-semibold">
       Tìm kiếm
     </button>
     <a href="danh_sach_phieu_xuat.php"
-       class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-slate-100">
+       class="px-3 py-2 rounded bg-red-700 hover:bg-red-600 text-white-100">
       Xóa lọc
     </a>
   </div>
 </form>
 
 
-    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-auto">
+    <div class="bg-white-800 rounded-lg border border-slate-700 overflow-auto">
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-900 text-slate-300">
+        <thead class="bg-black-900 text-black-300">
           <tr>
             <th class="px-4 py-3 text-left">Mã phiếu</th>
             <th class="px-4 py-3 text-left">Khách hàng</th>
@@ -409,7 +409,7 @@ $error = $_GET['error'] ?? '';
         </thead>
         <tbody>
           <?php if (empty($phieuXuats)): ?>
-            <tr><td colspan="8" class="px-4 py-4 text-center text-slate-400">Chưa có phiếu xuất nào.</td></tr>
+            <tr><td colspan="8" class="px-4 py-4 text-center text-black-400">Chưa có phiếu xuất nào.</td></tr>
           <?php else: ?>
             <?php foreach ($phieuXuats as $px): ?>
               <tr class="border-t border-slate-800 hover:bg-slate-700/50">

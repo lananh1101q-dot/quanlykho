@@ -22,17 +22,12 @@ $sanphams = $pdo->query("
     ORDER BY Tensp
 ")->fetchAll();
 
-$khos = $pdo->query("
-    SELECT Makho, Tenkho 
-    FROM Kho 
-    ORDER BY Tenkho
-")->fetchAll();
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $maxuat = trim($_POST['maxuathang'] ?? '');
     $makh = trim($_POST['makh'] ?? '');
-    $makho = trim($_POST['makho'] ?? '');
+ 
     $ngayxuat = $_POST['ngayxuat'] ?? '';
     $ghichu = trim($_POST['ghichu'] ?? '');
 
@@ -41,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dongiaArr = $_POST['dongia'] ?? [];
 
     // Kiểm tra dữ liệu chính
-    if ($maxuat === '' || $makh === '' || $makho === '' || $ngayxuat === '') {
-        $errors[] = 'Vui lòng nhập đầy đủ Mã xuất, Khách hàng, Kho, Ngày xuất.';
+    if ($maxuat === '' || $makh === '' || $ngayxuat === '') {
+        $errors[] = 'Vui lòng nhập đầy đủ Mã xuất, Khách hàng, Ngày xuất.';
     }
 
     // Chuẩn hóa chi tiết sản phẩm
@@ -86,13 +81,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Lưu phiếu xuất
         $stmtPhieu = $pdo->prepare("
             INSERT INTO Phieuxuat 
-            (Maxuathang, Makh, Makho, Ngayxuathang, Tongtienxuat, Ghichu)
-            VALUES (:ma, :makh, :makho, :ngay, :tong, :ghichu)
+            (Maxuathang, Makh, Ngayxuat, Tongtienxuat, Ghichu)
+            VALUES (:ma, :makh, :ngay, :tong, :ghichu)
         ");
         $stmtPhieu->execute([
             ':ma'    => $maxuat,
             ':makh'  => $makh,
-            ':makho' => $makho,
+            
             ':ngay'  => $ngayxuat,
             ':tong'  => $tong,
             ':ghichu'=> $ghichu,
@@ -105,11 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             VALUES (:ma, :masp, :sl, :dg, :tt)
         ");
 
-        $stmtTonkho = $pdo->prepare("
-            UPDATE Tonkho
-            SET Soluongton = Soluongton - :sl
-            WHERE Makho = :makho AND Masp = :masp
-        ");
+       $stmtTonkho = $pdo->prepare("
+    UPDATE Tonkho
+    SET Soluongton = Soluongton - :sl
+    WHERE Masp = :masp
+");
+
 
         foreach ($items as $it) {
             // Chi tiết phiếu xuất
@@ -123,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Trừ tồn kho
             $stmtTonkho->execute([
-                ':makho' => $makho,
+                
                 ':masp'  => $it['masp'],
                 ':sl'    => $it['soluong'],
             ]);
@@ -371,8 +367,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p class="text-slate-400 text-sm mt-1">Ghi nhận hàng xuất ra</p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Trờ về</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
+        
       </div>
     </div>
 
@@ -407,22 +402,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </select>
 </div>
 
-        <div>
-          <label class="block text-sm text-slate-300 mb-2">Kho xuất *</label>
-          <select name="makho" required class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
-            <option value="">-- Chọn kho --</option>
-            <?php foreach ($khos as $kho): ?>
-              <option value="<?= htmlspecialchars($kho['Makho']) ?>" <?= (($_POST['makho'] ?? '') === $kho['Makho']) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($kho['Tenkho']) ?> [<?= htmlspecialchars($kho['Makho']) ?>]
-              </option>
-            <?php endforeach; ?>
-          </select>
-          <?php if (empty($khos)): ?>
-            <p class="text-xs text-yellow-400 mt-1">Chưa có kho nào. Vui lòng tạo kho trước.</p>
-          <?php endif; ?>
-        </div>
+        
       </div>
       <div class="grid md:grid-cols-1 gap-4">
+          <div>
+          <label class="block text-sm text-slate-300 mb-2">Mã xuất hàng *</label>
+          <input name="maxuathang" required class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" value="<?= htmlspecialchars($_POST['maxuathang'] ?? '') ?>" />
+        </div>
         <div>
           <label class="block text-sm text-slate-300 mb-2">Ngày xuất *</label>
             <input type="date" name="ngayxuat" required
