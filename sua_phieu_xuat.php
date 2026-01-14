@@ -333,28 +333,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   </li>
               </ul>
           </li>
+          <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                  <i class="fas fa-file-import"></i> Phiếu xuất
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
+
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu xuất
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_xuat.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
                 <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_banhang.php">
-                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
-                        </a>
-                    </li>
+            
                     <li class="nav-item">
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 
@@ -366,6 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </li>
         </ul>
     </nav>
+    
 
     <div class="main-content">
   <div class="max-w-5xl mx-auto p-6 space-y-6">
@@ -397,7 +408,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div>
           <label class="block text-sm text-black-300 mb-2">Khách hàng *</label>
-          <select name="mankh" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
+          <select name="makh" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
             <option value="">-- Chọn --</option>
             <?php foreach ($khachhangs as $kh): ?>
               <option value="<?= htmlspecialchars($kh['Makh']) ?>" <?= (($_POST['makh'] ?? '') === $kh['Makh']) ? 'selected' : '' ?>>
@@ -444,7 +455,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   $slVal = $_POST['soluong'][$i] ?? '';
                   $dgVal = $_POST['dongia'][$i] ?? '';
               ?>
-              <tr class="border-t border-slate-800">
+              <tr class="border-t border-white-800">
                 <td class="px-3 py-2">
                   <select name="masp[]" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
                     <option value="">-- Chọn --</option>
@@ -487,16 +498,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   function addRow() {
     const tbody = document.getElementById('detail-rows');
     const tr = document.createElement('tr');
-    tr.className = 'border-t border-slate-800';
+    tr.className = 'border-t border-white-800';
     tr.innerHTML = `
       <td class="px-3 py-2">
-        <select name="masp[]" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
+        <select name="masp[]" class="w-full px-3 py-2 rounded bg-white-900 border border-slate-700">
           <option value="">-- Chọn --</option>
           ${optionTemplate}
         </select>
       </td>
-      <td class="px-3 py-2"><input name="soluong[]" type="number" min="1" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" /></td>
-      <td class="px-3 py-2"><input name="dongia[]" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" /></td>
+      <td class="px-3 py-2"><input name="soluong[]" type="number" min="1" class="w-full px-3 py-2 rounded bg-white-900 border border-slate-700" /></td>
+      <td class="px-3 py-2"><input name="dongia[]" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded bg-white-900 border border-slate-700" /></td>
       <td class="px-3 py-2 text-right"><button type="button" onclick="removeRow(this)" class="text-red-400 hover:text-red-200">Xóa</button></td>
     `;
     tbody.appendChild(tr);
