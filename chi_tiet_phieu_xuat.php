@@ -272,7 +272,7 @@ $chiTiet = $chiTiet->fetchAll();
             <tr><td colspan="7" class="px-4 py-4 text-center text-black-400">Không có chi tiết.</td></tr>
           <?php else: ?>
             <?php $stt = 1; foreach ($chiTiet as $ct): ?>
-              <tr class="border-t border-slate-800">
+              <tr class="border-t border-white-800">
                 <td class="px-4 py-2"><?= $stt++ ?></td>
                 <td class="px-4 py-2 font-semibold"><?= htmlspecialchars($ct['Masp']) ?></td>
                 <td class="px-4 py-2"><?= htmlspecialchars($ct['Tensp']) ?></td>
@@ -282,7 +282,7 @@ $chiTiet = $chiTiet->fetchAll();
                 <td class="px-4 py-2 text-right font-semibold"><?= number_format($ct['Thanhtien'], 0, ',', '.') ?> đ</td>
               </tr>
             <?php endforeach; ?>
-            <tr class="border-t-2 border-gray-700 bg-gray-900">
+            <tr class="border-t-2 border-gray-70 bg-white-900">
               <td colspan="6" class="px-4 py-3 text-right font-semibold">Tổng cộng:</td>
               <td class="px-4 py-3 text-right font-bold text-lg text-emerald-400"><?= number_format($phieuXuat['Tongtienxuat'], 0, ',', '.') ?> đ</td>
             </tr>

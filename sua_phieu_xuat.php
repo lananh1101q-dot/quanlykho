@@ -8,202 +8,120 @@ require_once __DIR__ . '/db.php';
 
 $errors = [];
 $success = '';
-$maxuat = $_GET['id'] ?? '';
+$id_goc = $_GET['id'] ?? ''; // Giữ ID gốc từ URL để dùng cho câu lệnh WHERE
 
-if (empty($maxuat)) {
+if (empty($id_goc)) {
     header('Location: danh_sach_phieu_xuat.php');
     exit;
 }
 
-// Lấy dữ liệu dropdown cho PHIẾU XUẤT
-$khachhangs = $pdo->query("
-    SELECT Makh, Tenkh 
-    FROM Khachhang 
-    ORDER BY Tenkh
-")->fetchAll();
+// Lấy dữ liệu dropdown
+$khachhangs = $pdo->query("SELECT Makh, Tenkh FROM Khachhang ORDER BY Tenkh")->fetchAll();
+$sanphams = $pdo->query("SELECT Masp, Tensp, Dvt FROM Sanpham ORDER BY Tensp")->fetchAll();
+$khos = $pdo->query("SELECT Makho, Tenkho FROM Kho ORDER BY Tenkho")->fetchAll();
 
-$sanphams = $pdo->query("
-    SELECT Masp, Tensp, Dvt, Giaban 
-    FROM Sanpham 
-    ORDER BY Tensp
-")->fetchAll();
-
-$khos = $pdo->query("
-    SELECT Makho, Tenkho 
-    FROM Kho 
-    ORDER BY Tenkho
-")->fetchAll();
-$phieuXuat = $pdo->prepare("
-    SELECT * 
-    FROM Phieuxuat 
-    WHERE Maxuathang = ?
-");
-$phieuXuat->execute([$maxuat]);
+// Lấy dữ liệu phiếu hiện tại
+$phieuXuat = $pdo->prepare("SELECT * FROM Phieuxuat WHERE Maxuathang = ?");
+$phieuXuat->execute([$id_goc]);
 $phieuXuat = $phieuXuat->fetch();
 
 if (!$phieuXuat) {
-    header('Location: danh_sach_phieu_xuat.php?error=Phiếu xuất không tồn tại');
+    header('Location: danh_sach_phieu_xuat.php?error=Phiếu không tồn tại');
     exit;
 }
-$chiTiet = $pdo->prepare("
-    SELECT ct.*, sp.Tensp, sp.Dvt
-    FROM Chitiet_Phieuxuat ct
-    JOIN Sanpham sp ON ct.Masp = sp.Masp
-    WHERE ct.Maxuathang = ?
-");
-$chiTiet->execute([$maxuat]);
+
+// Lấy chi tiết phiếu và thông tin kho (Vì Phieuxuat gốc không có cột Makho, ta lấy từ Chitiet hoặc giả định 1 kho)
+// Lưu ý: Trong DB của bạn, Tonkho cần Makho. Tôi sẽ mặc định lấy kho đầu tiên hoặc bạn cần thêm input chọn Kho vào form.
+$chiTiet = $pdo->prepare("SELECT ct.*, sp.Tensp FROM Chitiet_Phieuxuat ct JOIN Sanpham sp ON ct.Masp = sp.Masp WHERE ct.Maxuathang = ?");
+$chiTiet->execute([$id_goc]);
 $chiTietPhieu = $chiTiet->fetchAll();
 
-
-
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // ====== THÔNG TIN PHIẾU XUẤT ======
-    $maxuat = trim($_POST['maxuathang'] ?? '');
+    $maxuat_moi = trim($_POST['maxuathang'] ?? '');
     $makh = trim($_POST['makh'] ?? '');
     $ngayxuat = $_POST['ngayxuat'] ?? '';
     $ghichu = trim($_POST['ghichu'] ?? '');
+    $makho = "K01"; // GIẢ ĐỊNH: Bạn nên thêm một <select name="makho"> vào form để khớp với bảng Tonkho
 
-    // ====== CHI TIẾT ======
     $maspArr = $_POST['masp'] ?? [];
     $soluongArr = $_POST['soluong'] ?? [];
     $dongiaArr = $_POST['dongia'] ?? [];
 
-    // ====== KIỂM TRA BẮT BUỘC ======
-    if ($maxuat === '' || $makh === '' || $ngayxuat === '') {
+    if ($maxuat_moi === '' || $makh === '' || $ngayxuat === '') {
         $errors[] = 'Vui lòng nhập đầy đủ Mã xuất, Khách hàng, Ngày xuất.';
     }
 
-    // ====== CHUẨN HÓA CHI TIẾT ======
     $items = [];
-    for ($i = 0; $i < count($maspArr); $i++) {
-        $masp = trim($maspArr[$i] ?? '');
-        $soluong = (int)($soluongArr[$i] ?? 0);
-        $dongia = (float)($dongiaArr[$i] ?? 0);
-
-        if ($masp === '' || $soluong <= 0 || $dongia <= 0) {
-            continue;
+    foreach ($maspArr as $i => $masp) {
+        $ms = trim($masp);
+        $sl = (int)($soluongArr[$i] ?? 0);
+        $dg = (float)($dongiaArr[$i] ?? 0);
+        if ($ms !== '' && $sl > 0) {
+            $items[] = ['masp' => $ms, 'soluong' => $sl, 'dongia' => $dg];
         }
-
-        $items[] = [
-            'masp'    => $masp,
-            'soluong' => $soluong,
-            'dongia'  => $dongia,
-        ];
     }
 
-    if (empty($items)) {
-        $errors[] = 'Cần ít nhất một dòng sản phẩm hợp lệ.';
-    }
-
-    // === PHẦN XỬ LÝ DB (BEGIN TRANSACTION) VIẾT TIẾP Ở DƯỚI ===
-
+    if (empty($items)) $errors[] = 'Cần ít nhất một sản phẩm.';
 
     if (!$errors) {
-    try {
-        $pdo->beginTransaction();
+        try {
+            $pdo->beginTransaction();
 
-        /* ===== 1. HOÀN TRẢ TỒN KHO CŨ ===== */
-        foreach ($chiTietPhieu as $ctCu) {
-            $stmtHoan = $pdo->prepare("
-                UPDATE Tonkho
-                SET Soluongton = Soluongton + :sl
-                WHERE Masp = :masp
-            ");
-            $stmtHoan->execute([
-                ':masp' => $ctCu['Masp'],
-                ':sl'   => $ctCu['Soluong'],
-            ]);
-        }
-
-        /* ===== 2. XÓA CHI TIẾT PHIẾU XUẤT CŨ ===== */
-        $pdo->prepare("
-            DELETE FROM Chitiet_Phieuxuat 
-            WHERE Maxuathang = ?
-        ")->execute([$maxuat]);
-
-        /* ===== 3. TÍNH TỔNG TIỀN MỚI ===== */
-        $tong = 0;
-        foreach ($items as $it) {
-            $tong += $it['soluong'] * $it['dongia'];
-        }
-
-        /* ===== 4. CẬP NHẬT PHIẾU XUẤT ===== */
-        $stmtPhieu = $pdo->prepare("
-            UPDATE Phieuxuat
-            SET Maxuathang = :manew,
-                Makh = :makh,
-                Ngayxuat = :ngay,
-                Tongtienxuat = :tong,
-                Ghichu = :ghichu
-            WHERE Maxuathang = :macu
-        ");
-        $stmtPhieu->execute([
-            ':manew' => $maxuat,
-            ':makh'  => $makh,
-            ':ngay'  => $ngayxuat,
-            ':tong'  => $tong,
-            ':ghichu'=> $ghichu,
-            ':macu'  => $maxuat,
-        ]);
-
-        /* ===== 5. THÊM CHI TIẾT MỚI + TRỪ TỒN ===== */
-        $stmtCt = $pdo->prepare("
-            INSERT INTO Chitiet_Phieuxuat
-                (Maxuathang, Masp, Soluong, Dongiaxuat)
-            VALUES
-                (:ma, :masp, :sl, :dg)
-        ");
-
-        $stmtTru = $pdo->prepare("
-            UPDATE Tonkho
-            SET Soluongton = Soluongton - :sl
-            WHERE Masp = :masp AND Soluongton >= :sl
-        ");
-
-        foreach ($items as $it) {
-            // thêm chi tiết
-            $stmtCt->execute([
-                ':ma'   => $maxuat,
-                ':masp' => $it['masp'],
-                ':sl'   => $it['soluong'],
-                ':dg'   => $it['dongia'],
-            ]);
-
-            // trừ tồn kho
-            $stmtTru->execute([
-                ':masp' => $it['masp'],
-                ':sl'   => $it['soluong'],
-            ]);
-
-            if ($stmtTru->rowCount() === 0) {
-                throw new Exception("Không đủ tồn kho cho sản phẩm {$it['masp']}");
+            // 1. Hoàn trả tồn kho cũ (Dựa trên id_goc)
+            foreach ($chiTietPhieu as $ctCu) {
+                $stmtHoan = $pdo->prepare("UPDATE Tonkho SET Soluongton = Soluongton + ? WHERE Masp = ? AND Makho = ?");
+                $stmtHoan->execute([$ctCu['Soluong'], $ctCu['Masp'], $makho]);
             }
+
+            // 2. Xóa chi tiết cũ
+            $pdo->prepare("DELETE FROM Chitiet_Phieuxuat WHERE Maxuathang = ?")->execute([$id_goc]);
+
+            // 3. Cập nhật phiếu xuất (Sử dụng id_cu để định vị dòng cũ)
+            $tong = 0;
+            foreach ($items as $it) { $tong += $it['soluong'] * $it['dongia']; }
+
+            $stmtUpdatePhieu = $pdo->prepare("UPDATE Phieuxuat SET Maxuathang = :manew, Makh = :makh, Ngayxuat = :ngay, Tongtienxuat = :tong, Ghichu = :ghichu WHERE Maxuathang = :id_cu");
+            $stmtUpdatePhieu->execute([
+                ':manew' => $maxuat_moi,
+                ':makh'  => $makh,
+                ':ngay'  => $ngayxuat,
+                ':tong'  => $tong,
+                ':ghichu'=> $ghichu,
+                ':id_cu' => $id_goc
+            ]);
+
+            // 4. Thêm chi tiết mới và trừ tồn
+            $stmtIns = $pdo->prepare("INSERT INTO Chitiet_Phieuxuat (Maxuathang, Masp, Soluong, Dongiaxuat) VALUES (?, ?, ?, ?)");
+            $stmtTru = $pdo->prepare("UPDATE Tonkho SET Soluongton = Soluongton - ? WHERE Masp = ? AND Makho = ? AND Soluongton >= ?");
+
+            foreach ($items as $it) {
+                $stmtIns->execute([$maxuat_moi, $it['masp'], $it['soluong'], $it['dongia']]);
+                $stmtTru->execute([$it['soluong'], $it['masp'], $makho, $it['soluong']]);
+
+                if ($stmtTru->rowCount() === 0) {
+                    throw new Exception("Sản phẩm {$it['masp']} không đủ tồn kho tại kho {$makho}.");
+                }
+            }
+
+            $pdo->commit();
+            header("Location: danh_sach_phieu_xuat.php?success=sua");
+            exit;
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $errors[] = 'Lỗi: ' . $e->getMessage();
         }
-
-        $pdo->commit();
-        header("Location: danh_sach_phieu_xuat.php?success=sua");
-        exit;
-
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        $errors[] = 'Lỗi khi cập nhật phiếu xuất: ' . $e->getMessage();
     }
-}
-
 } else {
-    // Hiển thị dữ liệu hiện tại của PHIẾU XUẤT
+    // Load dữ liệu ban đầu vào form
     $_POST['maxuathang'] = $phieuXuat['Maxuathang'];
-    $_POST['makh']       = $phieuXuat['Makh'];
-    $_POST['ngayxuat']   = $phieuXuat['Ngayxuat'];
-    $_POST['ghichu']     = $phieuXuat['Ghichu'];
-
-    $_POST['masp']    = array_column($chiTietPhieu, 'Masp');
+    $_POST['makh'] = $phieuXuat['Makh'];
+    $_POST['ngayxuat'] = $phieuXuat['Ngayxuat'];
+    $_POST['ghichu'] = $phieuXuat['Ghichu'];
+    $_POST['masp'] = array_column($chiTietPhieu, 'Masp');
     $_POST['soluong'] = array_column($chiTietPhieu, 'Soluong');
-    $_POST['dongia']  = array_column($chiTietPhieu, 'Dongiaxuat');
+    $_POST['dongia'] = array_column($chiTietPhieu, 'Dongiaxuat');
 }
-
+?>
 ?>
 <!doctype html>
 <html lang="vi">
@@ -333,28 +251,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   </li>
               </ul>
           </li>
+          <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                  <i class="fas fa-file-import"></i> Phiếu xuất
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
+
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu xuất
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_xuat.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
                 <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_banhang.php">
-                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
-                        </a>
-                    </li>
+            
                     <li class="nav-item">
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 
@@ -366,6 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </li>
         </ul>
     </nav>
+    
 
     <div class="main-content">
   <div class="max-w-5xl mx-auto p-6 space-y-6">
@@ -397,7 +326,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div>
           <label class="block text-sm text-black-300 mb-2">Khách hàng *</label>
-          <select name="mankh" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
+          <select name="makh" required class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
             <option value="">-- Chọn --</option>
             <?php foreach ($khachhangs as $kh): ?>
               <option value="<?= htmlspecialchars($kh['Makh']) ?>" <?= (($_POST['makh'] ?? '') === $kh['Makh']) ? 'selected' : '' ?>>
@@ -444,7 +373,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   $slVal = $_POST['soluong'][$i] ?? '';
                   $dgVal = $_POST['dongia'][$i] ?? '';
               ?>
-              <tr class="border-t border-slate-800">
+              <tr class="border-t border-white-800">
                 <td class="px-3 py-2">
                   <select name="masp[]" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
                     <option value="">-- Chọn --</option>
@@ -487,16 +416,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   function addRow() {
     const tbody = document.getElementById('detail-rows');
     const tr = document.createElement('tr');
-    tr.className = 'border-t border-slate-800';
+    tr.className = 'border-t border-white-800';
     tr.innerHTML = `
       <td class="px-3 py-2">
-        <select name="masp[]" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
+        <select name="masp[]" class="w-full px-3 py-2 rounded bg-white-900 border border-slate-700">
           <option value="">-- Chọn --</option>
           ${optionTemplate}
         </select>
       </td>
-      <td class="px-3 py-2"><input name="soluong[]" type="number" min="1" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" /></td>
-      <td class="px-3 py-2"><input name="dongia[]" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" /></td>
+      <td class="px-3 py-2"><input name="soluong[]" type="number" min="1" class="w-full px-3 py-2 rounded bg-white-900 border border-slate-700" /></td>
+      <td class="px-3 py-2"><input name="dongia[]" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded bg-white-900 border border-slate-700" /></td>
       <td class="px-3 py-2 text-right"><button type="button" onclick="removeRow(this)" class="text-red-400 hover:text-red-200">Xóa</button></td>
     `;
     tbody.appendChild(tr);

@@ -202,19 +202,32 @@ tbody tr:hover {
                   </li>
               </ul>
           </li>
+          <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                  <i class="fas fa-file-import"></i> Phiếu xuất
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
+
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu xuất
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_xuat.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
                 <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-               <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                    <li class="nav-item">
-                        <a class="nav-link" href="quanly_banhang.php">
-                            <i class="fas fa-cash-register"></i> Quản lý bán hàng
-
-                        </a>
-                    </li>
+            
                     <li class="nav-item">
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
@@ -335,6 +348,13 @@ const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
 if (btnPhieuNhap) {
     btnPhieuNhap.addEventListener("click", function () {
         submenuPhieuNhap.classList.toggle("d-none");
+    });
+}const btnPhieuXuat = document.getElementById("btnPhieuXuat");
+const submenuPhieuXuat = document.getElementById("submenuPhieuXuat");
+
+if (btnPhieuXuat) {
+    btnPhieuXuat.addEventListener("click", function () {
+        submenuPhieuXuat.classList.toggle("d-none");
     });
 }
 
