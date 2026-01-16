@@ -149,28 +149,37 @@ input:not([type="file"]), select {
 }
 
 /* --- 7. Nút Lưu Sản Phẩm --- */
-.vung-nut-luu {
-    display: flex;
-    justify-content: flex-end; /* Đẩy nút sang phải */
-    padding-top: 10px;
-}
 
-.nut-luu-chinh {
-    background-color: #28a745; /* Màu xanh lá nổi bật */
-    color: white;
-    padding: 15px 25px;
+.nhom-nut-chuc-nang .nut {
+    padding: 10px 18px;
+    margin-left: 8px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     transition: background-color 0.2s;
 }
 
-.nut-luu-chinh:hover {
-    background-color: #218838;
+.nut-trove {
+    background-color: #4CAF50; /* Xanh lá */
 }
 
+.nut-them-moi {
+    background-color: #3498db; /* Xanh dương */
+}
+.nhom-nut-chuc-nang {
+    display: flex;
+    justify-content: flex-end; /* Đẩy sang phải */
+    margin-top: 20px;
+}
+.nut:hover {
+    filter: brightness(1.1);
+}
 /* Các trường bị disabled */
 input:disabled {
     background-color: #f0f0f0;

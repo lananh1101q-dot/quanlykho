@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     'fullname' => $user['Hovaten'],
                     'role' => $user['Vaitro'],
                 ];
-                header("Location: dashboard.php");
+                header("Location: trangchu.php");
                 exit;
             }
         }
