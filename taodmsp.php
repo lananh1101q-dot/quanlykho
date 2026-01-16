@@ -230,19 +230,12 @@ if (isset($_POST['btnTao'])) {
                         <label for="mota">Mô tả</label>
                          <textarea id="mota" name="mota" rows="4" placeholder="Nhập mô tả chi tiết cho danh mục..."></textarea>
                     </div>
-                    
-                    <div class="truong-nhap mot-cot vung-switch">
-                        <div class="nhom-switch">
-                            <label for="Kichhoat">Kích hoạt</label>
-                            <input type="checkbox" id="Kichhoat" name="Kichhoat" value="1" checked>
-                            <span class="slider round"></span>
-                        </div>
-                    </div>
+              
 
                 </div>
 
                 <div class="vung-nut-hanh-dong">
-                    <button type="submit" name="btnTaoTiep" class="nut nut-tao-tiep">Tạo & tiếp tục tạo mới</button>
+                 
                     <button type="submit" name="btnTao" class="nut nut-chinh">Tạo</button>
                     <a href="/quanlykho/dmsp.php" class="nut nut-phu">Quay lại</a>
                 </div>

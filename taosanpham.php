@@ -44,7 +44,8 @@ if (isset($_POST['btnluu'])) {
                     VALUES ('$Masp', '$Tensp', '$Madm', '$Dvt', $Giaban)";
 
             if (mysqli_query($conn, $sql)) {
-                header("Location: Sanpham.php");
+                echo "<script>alert('Thêm sản phẩm thành công!'); window.location.href='Sanpham.php'</script>";
+                
                 exit;
             } else {
                 echo "<script>alert('Lỗi thêm sản phẩm!');</script>";

@@ -420,7 +420,7 @@ form button[type="submit"]:hover {
              <tr>
                 <td><?= $row['Madm'] ?></td>
                 <td><?= $row['Tendm'] ?></td>
-                <td><?= $row['mota'] ?></td>
+                <td><?= $row['Mota'] ?></td>
                 <td class="cot-hanh-dong-nut-td">
                     <a href="/quanlykho/suadmsp.php?Madm=<?= $row['Madm'] ?>" class="nut-hanh-dong nut-sua" title="Sửa"><i class="fas fa-edit"></i></a>
                     <a onclick="return confirm('Bạn có chắc muốn xóa danh mục này?');" 

@@ -13,6 +13,13 @@ function tao_ins($Masp, $Tensp, $Madm, $dvt, $giaban, $conn) {
     return mysqli_query($conn, $sql);
 }
 
+function kiemtra_masp($Masp, $conn) {
+    $sql = "SELECT 1 FROM Sanpham WHERE Masp = '$Masp' LIMIT 1";
+    $rs = mysqli_query($conn, $sql);
+    return mysqli_num_rows($rs) > 0;
+}
+
+
 // ===============================
 // 4. XỬ LÝ NHẬP EXCEL
 // ===============================
@@ -38,12 +45,20 @@ if (isset($_POST['btnUpload'])) {
       $giaban   = $sheetData[$i]['E'];
 
         // Không insert dòng trống
-       if ($Masp != "") {
+        if ($Masp != "") {
+
+            // Nếu mã đã tồn tại → bỏ qua
+            if (kiemtra_masp($Masp, $conn)) {
+                continue; // nhảy sang dòng tiếp theo
+            }
+
+            // Nếu chưa tồn tại → insert
             if (!tao_ins($Masp, $Tensp, $Madm, $dvt, $giaban, $conn)) {
                 echo "Lỗi insert dòng $i: " . mysqli_error($conn);
                 exit;
             }
         }
+
 
     }
 
@@ -390,11 +405,7 @@ if (!$list) {
                   </li>
               </ul>
           </li>
-            <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                    <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
-                    <i class="fas fa-chevron-down float-end"></i>
-                </a>
+          
 
             
                     <li class="nav-item">
@@ -403,8 +414,8 @@ if (!$list) {
                         </a>
                     </li>
                   
-                </ul>
-            </li>
+                
+            
 
             <li class="nav-item">
                 <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>

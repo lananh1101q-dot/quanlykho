@@ -254,7 +254,7 @@ if (isset($_POST['btnTao'])) {
                 </div>
 
                 <div class="vung-nut-hanh-dong">
-                    <button type="submit" name="btnTaoTiep" class="nut nut-tao-tiep">Tạo & tiếp tục tạo mới</button>
+                   
                     <button type="submit" name="btnTao" class="nut nut-chinh">Tạo</button>
                     <a href="/quanlykho/Nhacungcap.php" class="nut nut-phu">Quay lại</a>
                 </div>
