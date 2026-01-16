@@ -11,20 +11,27 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 
 // 2. Xử lý tìm kiếm và lấy dữ liệu (Sửa tên cột theo Database của bạn)
-$search = trim($_GET['search'] ?? '');
+// 2. Xử lý tìm kiếm theo mã và tên
+$search_ma  = trim($_GET['search_ma'] ?? '');
+$search_ten = trim($_GET['search_ten'] ?? '');
 
-if ($search !== '') {
-    $stmt = $pdo->prepare("SELECT * FROM khachhang 
-                           WHERE Makh LIKE ? 
-                              OR Tenkh LIKE ? 
-                              OR Sdtkh LIKE ?");
-    $param = "%$search%";
-    $stmt->execute([$param, $param, $param]);
-} else {
-    $stmt = $pdo->prepare("SELECT * FROM khachhang ORDER BY Makh");
-    $stmt->execute();
+$sql = "SELECT * FROM khachhang WHERE 1=1"; // 1=1 để dễ thêm điều kiện
+$params = [];
+
+if ($search_ma !== '') {
+    $sql .= " AND Makh LIKE ?";
+    $params[] = "%$search_ma%";
 }
 
+if ($search_ten !== '') {
+    $sql .= " AND Tenkh LIKE ?";
+    $params[] = "%$search_ten%";
+}
+
+$sql .= " ORDER BY Makh";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $page_title = "Khách Hàng - Quản Lý Kho Hàng";
@@ -116,183 +123,172 @@ $page_title = "Khách Hàng - Quản Lý Kho Hàng";
     </style>
 </head>
 <body>
-    <nav class="sidebar">
-        <div class="text-center mb-4">
-            <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
-          </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
-            </li>
-           <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
-                    <i class="fas fa-box"></i> Quản lý sản phẩm
-                    <i class="fas fa-chevron-down float-end"></i>
-                </a>
+  <nav class="sidebar">
+    <div class="text-center mb-4">
+        <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
+        </li>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
-                    <li class="nav-item">
-                        <a class="nav-link" href="Sanpham.php">
-                            <i class="fas fa-cube"></i> Sản phẩm
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="dmsp.php">
-                            <i class="fas fa-tags"></i> Danh mục sản phẩm
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="Nhacungcap.php">
-                            <i class="fas fa-truck"></i> Nhà cung cấp
-                        </a>
-                    </li>
-                </ul>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
+                <i class="fas fa-box"></i> Quản lý sản phẩm
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
+                <li class="nav-item"><a class="nav-link" href="Sanpham.php"><i class="fas fa-cube"></i> Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="dmsp.php"><i class="fas fa-tags"></i> Danh mục sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="Nhacungcap.php"><i class="fas fa-truck"></i> Nhà cung cấp</a></li>
+            </ul>
+        </li>
 
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
+                <i class="fas fa-file-import"></i> Phiếu nhập kho
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
+                <li class="nav-item"><a class="nav-link" href="danh_sach_phieu_nhap.php"><i class="fas fa-list"></i> Danh sách phiếu nhập</a></li>
+                <li class="nav-item"><a class="nav-link" href="phieu_nhap.php"><i class="fas fa-plus-circle"></i> Tạo phiếu nhập</a></li>
+            </ul>
+        </li>
 
-            <li class="nav-item">
-              <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
-                  <i class="fas fa-file-import"></i> Phiếu nhập kho
-                  <i class="fas fa-chevron-down float-end"></i>
-              </a>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                <i class="fas fa-file-export"></i> Phiếu xuất <!-- Đã sửa icon đúng -->
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                <li class="nav-item"><a class="nav-link" href="danh_sach_phieu_xuat.php"><i class="fas fa-list"></i> Danh sách phiếu xuất</a></li>
+                <li class="nav-item"><a class="nav-link" href="phieu_xuat.php"><i class="fas fa-plus-circle"></i> Tạo phiếu xuất</a></li>
+            </ul>
+        </li>
 
-              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
-                  <li class="nav-item">
-                      <a class="nav-link" href="danh_sach_phieu_nhap.php">
-                          <i class="fas fa-list"></i> Danh sách phiếu nhập
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="phieu_nhap.php">
-                          <i class="fas fa-plus-circle"></i> Tạo phiếu nhập
-                      </a>
-                  </li>
-              </ul>
-          </li>
-          <li class="nav-item">
-              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
-                  <i class="fas fa-file-import"></i> Phiếu xuất
-                  <i class="fas fa-chevron-down float-end"></i>
-              </a>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao"> <!-- ĐÃ SỬA: thêm ul đúng id -->
+                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-warehouse"></i> Báo cáo tồn kho</a></li>
+            </ul>
+        </li>
 
-              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
-                  <li class="nav-item">
-                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
-                          <i class="fas fa-list"></i> Danh sách phiếu xuất
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="phieu_xuat.php">
-                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
-                      </a>
-                  </li>
-              </ul>
-          </li>
-            <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                    <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
-                    <i class="fas fa-chevron-down float-end"></i>
-                </a>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnKhachHang">
+                <i class="fas fa-users"></i> Quản lý khách hàng <!-- Đã sửa icon đúng -->
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuKhachHang">
+                <li class="nav-item"><a class="nav-link" href="khachhang.php"><i class="fas fa-user"></i> Khách hàng</a></li>
+                <li class="nav-item"><a class="nav-link" href="loaikhachhang.php"><i class="fas fa-users-cog"></i> Loại khách hàng</a></li>
+            </ul>
+        </li>
 
-            
-                    <li class="nav-item">
-                        <a class="nav-link" href="tonkho.php">
-                            <i class="fas fa-warehouse"></i> Báo cáo tồn kho
-                        </a>
-                    </li>
-                  
-                </ul>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </li>
+    </ul>
+</nav>
 
-            <li class="nav-item">
-                <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-            </li>
-        </ul>
-    </nav>
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Khách Hàng</h2>
+        <a href="them_khachhang.php" class="btn btn-success"><i class="fas fa-plus me-2"></i>Thêm khách hàng</a>
+    </div>
 
-    <main class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2> Khách Hàng</h2>
-            <a href="them_khachhang.php" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm khách hàng</a>
-        </div>
-
-        <div class="card-table">
-            <div class="d-flex justify-content-end mb-3">
-                <form action="" method="GET" class="search-box input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="<?= htmlspecialchars($search) ?>">
-                    <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
-                </form>
+    <!-- Phần tìm kiếm mới - giống hệt Sanpham.php -->
+    <form action="" method="GET" class="mb-4">
+        <div class="d-flex gap-3 align-items-center">
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text text-danger fw-bold">Q</span>
+                <input type="text" name="search_ma" class="form-control" placeholder="Tìm kiếm mã khách hàng..." 
+                       value="<?= htmlspecialchars($search_ma ?? '') ?>">
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Mã KH</th>
-                            <th>Tên khách hàng</th>
-                            <th>Số điện thoại</th>
-                            <th>Địa chỉ</th>
-                            <th>Loại KH</th>
-                            <th class="text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($customers as $row): ?>
-                        <tr>
-                            <td class="fw-bold"><?= $row['Makh'] ?></td>
-                            <td><?= htmlspecialchars($row['Tenkh']) ?></td>
-                            <td><?= $row['Sdtkh'] ?></td>
-                            <td><?= htmlspecialchars($row['Diachikh']) ?></td>
-                            <td>
-                                <span class="badge bg-info text-dark">Loại <?= $row['Maloaikh'] ?></span>
-                            </td>
-                            <td class="text-center">
-                                <a href="sua_khachhang.php?id=<?= $row['Makh'] ?>" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                                <a href="xoa_khachhang.php?id=<?= $row['Makh'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Xóa khách hàng này?')"><i class="fas fa-trash"></i></a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                        
-                        <?php if (empty($customers)): ?>
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu khách hàng.</td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text text-danger fw-bold">Q</span>
+                <input type="text" name="search_ten" class="form-control" placeholder="Tìm kiếm tên khách hàng..." 
+                       value="<?= htmlspecialchars($search_ten ?? '') ?>">
             </div>
+
+            <button type="submit" class="btn btn-dark px-4">
+                <i class="fas fa-search me-2"></i>Tìm kiếm
+            </button>
         </div>
-    </main>
+    </form>
+
+    <!-- Bảng danh sách khách hàng -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Tên khách hàng</th>
+                    <th>Số điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Loại KH</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($customers as $row): ?>
+                <tr>
+                    <td class="fw-bold"><?= htmlspecialchars($row['Makh']) ?></td>
+                    <td><?= htmlspecialchars($row['Tenkh']) ?></td>
+                    <td><?= htmlspecialchars($row['Sdtkh']) ?></td>
+                    <td><?= htmlspecialchars($row['Diachikh'] ?? '') ?></td>
+                    <td>
+                        <span class="badge bg-info text-dark">Loại <?= htmlspecialchars($row['Maloaikh']) ?></span>
+                    </td>
+                    <td class="text-center">
+                        <a href="sua_khachhang.php?id=<?= htmlspecialchars($row['Makh']) ?>" 
+                           class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                        <a href="xoa_khachhang.php?id=<?= htmlspecialchars($row['Makh']) ?>" 
+                           class="btn btn-sm btn-outline-danger" 
+                           onclick="return confirm('Bạn có chắc muốn xóa khách hàng này?')"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+
+                <?php if (empty($customers)): ?>
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">Không tìm thấy khách hàng nào.</td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-document.getElementById("btnSanPham").addEventListener("click", function () {
-    const menu = document.getElementById("submenuSanPham");
-    menu.classList.toggle("d-none");
-    
-});
-document.getElementById("btnBaoCao").addEventListener("click", function () {
-    document.getElementById("submenuBaoCao").classList.toggle("d-none");
-});
-const btnPhieuNhap = document.getElementById("btnPhieuNhap");
-const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
-
-if (btnPhieuNhap) {
-    btnPhieuNhap.addEventListener("click", function () {
-        submenuPhieuNhap.classList.toggle("d-none");
+<script>
+    // Quản lý sản phẩm
+    document.getElementById("btnSanPham").addEventListener("click", function () {
+        document.getElementById("submenuSanPham").classList.toggle("d-none");
     });
-}
-const btnPhieuXuat = document.getElementById("btnPhieuXuat");
-const submenuPhieuXuat = document.getElementById("submenuPhieuXuat");
 
-if (btnPhieuXuat) {
-    btnPhieuXuat.addEventListener("click", function () {
-        submenuPhieuXuat.classList.toggle("d-none");
+    // Phiếu nhập kho
+    document.getElementById("btnPhieuNhap").addEventListener("click", function () {
+        document.getElementById("submenuPhieuNhap").classList.toggle("d-none");
     });
-}
+
+    // Phiếu xuất
+    document.getElementById("btnPhieuXuat").addEventListener("click", function () {
+        document.getElementById("submenuPhieuXuat").classList.toggle("d-none");
+    });
+
+    // Báo cáo & Thống kê (giờ hoạt động)
+    document.getElementById("btnBaoCao").addEventListener("click", function () {
+        document.getElementById("submenuBaoCao").classList.toggle("d-none");
+    });
+
+    // QUẢN LÝ KHÁCH HÀNG (đã thêm đầy đủ toggle)
+    document.getElementById("btnKhachHang").addEventListener("click", function () {
+        document.getElementById("submenuKhachHang").classList.toggle("d-none");
+    });
 </script>
 </body>
 </html>
