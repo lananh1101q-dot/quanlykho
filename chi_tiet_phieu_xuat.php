@@ -6,21 +6,46 @@ if (!isset($_SESSION['user'])) {
 }
 require_once __DIR__ . '/db.php';
 
-$sql = "SELECT tk.Makho, k.Tenkho, tk.Masp, sp.Tensp, sp.Dvt, tk.Soluongton
-        FROM Tonkho tk
-        JOIN Kho k ON tk.Makho = k.Makho
-        JOIN Sanpham sp ON tk.Masp = sp.Masp
-        ORDER BY k.Tenkho, sp.Tensp";
-$rows = $pdo->query($sql)->fetchAll();
+$maxuathang = $_GET['id'] ?? '';
+
+if (empty($maxuathang)) {
+    header('Location: danh_sach_phieu_xuat.php');
+    exit;
+}
+
+$phieuXuat = $pdo->prepare("
+    SELECT px.*, kh.Tenkh, kh.Sdtkh, kh.Diachikh
+    FROM Phieuxuat px
+    LEFT JOIN Khachhang kh ON px.Makh = kh.Makh
+    WHERE px.Maxuathang = ?
+");
+$phieuXuat->execute([$maxuathang]);
+
+$phieuXuat = $phieuXuat->fetch();
+
+if (!$phieuXuat) {
+    header('Location: danh_sach_phieu_xuat.php?error=Phiếu xuất không tồn tại');
+    exit;
+}
+
+$chiTiet = $pdo->prepare("
+    SELECT ct.*, sp.Tensp, sp.Dvt
+    FROM Chitiet_Phieuxuat ct
+    JOIN Sanpham sp ON ct.Masp = sp.Masp
+    WHERE ct.Maxuathang = ?
+");
+$chiTiet->execute([$maxuathang]);
+
+$chiTiet = $chiTiet->fetchAll();
 ?>
 <!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Báo cáo tồn kho</title>
+  <title>Chi tiết phiếu xuất</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
        <style>
         body { 
@@ -186,49 +211,87 @@ $rows = $pdo->query($sql)->fetchAll();
     </nav>
 
     <div class="main-content">
-  <div class="max-w-6xl mx-auto p-6 space-y-6">
+  <div class="max-w-5xl mx-auto p-6 space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold">Báo cáo tồn kho</h1>
-        <p class="text-slate-400 text-sm mt-1">Danh sách tồn kho theo kho và sản phẩm</p>
+        <h1 class="text-2xl font-bold">Chi tiết phiếu xuất</h1>
+        <p class="text-slate-400 text-sm mt-1">Mã phiếu: <?= htmlspecialchars($phieuXuat['Maxuathang']) ?></p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
+        <a href="sua_phieu_xuat.php?id=<?= urlencode($phieuXuat['Maxuathang']) ?>" class="px-3 py-2 rounded bg-white-600 hover:bg-blue-700 font-white">Sửa</a>
+        <a href="danh_sach_phieu_xuat.php" class="px-3 py-2 rounded bg-white-800 hover:bg-white-700"></a>
+        <a href="logout.php" class="px-3 py-2 rounded bg-white-600 hover:bg-white-700"></a>
       </div>
     </div>
 
-    <div class="flex items-center justify-between">
+    <div class="bg-white-800 rounded-lg p-5 space-y-4">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-black-400 mb-1">Mã phiếu xuất</label>
+          <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Maxuathang']) ?></div>
+        </div>
+        <div>
+          <label class="block text-sm text-black-400 mb-1">Mã khách hàng</label>
+          <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Makh']) ?></div>
+        </div>
+        <div>
+          <label class="block text-sm text-black-400 mb-1">Ngày xuất</label>
+          <div class="text-lg"><?= date('d/m/Y', strtotime($phieuXuat['Ngayxuat'])) ?></div>
+        </div>
+        <div>
+          <label class="block text-sm text-black-400 mb-1">Thành tiền</label>
+          <div class="text-2xl font-bold text-emerald-400"><?= number_format($phieuXuat['Tongtienxuat'], 0, ',', '.') ?> đ</div>
+        </div>
+        <?php if ($phieuXuat['Ghichu']): ?>
+          <div class="md:col-span-2">
+            <label class="block text-sm text-black-400 mb-1">Ghi chú</label>
+            <div class="text-black-300"><?= nl2br(htmlspecialchars($phieuXuat['Ghichu'])) ?></div>
+          </div>
+        <?php endif; ?>
+      </div>
+    </div>
+
+    <div class="bg-white-800 rounded-lg border border-white-700 overflow-auto">
+      <div class="p-4 border-b border-white-700">
+        <h2 class="text-lg font-semibold">Chi tiết sản phẩm</h2>
+      </div>
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-900 text-slate-300">
+        <thead class="bg-white-900 text-black-300">
           <tr>
-            <th class="px-4 py-3 text-left">Kho</th>
+            <th class="px-4 py-3 text-left">STT</th>
             <th class="px-4 py-3 text-left">Mã SP</th>
             <th class="px-4 py-3 text-left">Tên sản phẩm</th>
             <th class="px-4 py-3 text-left">ĐVT</th>
-            <th class="px-4 py-3 text-right">Số lượng tồn</th>
+            <th class="px-4 py-3 text-right">Số lượng</th>
+            <th class="px-4 py-3 text-right">Đơn giá</th>
+            <th class="px-4 py-3 text-right">Thành tiền</th>
           </tr>
         </thead>
         <tbody>
-          <?php if (empty($rows)): ?>
-            <tr><td colspan="5" class="px-4 py-4 text-center text-slate-400">Chưa có dữ liệu tồn kho.</td></tr>
+          <?php if (empty($chiTiet)): ?>
+            <tr><td colspan="7" class="px-4 py-4 text-center text-black-400">Không có chi tiết.</td></tr>
           <?php else: ?>
-            <?php foreach ($rows as $r): ?>
-              <tr class="border-t border-slate-800">
-                <td class="px-4 py-2">[<?= htmlspecialchars($r['Makho']) ?>] <?= htmlspecialchars($r['Tenkho']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Masp']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Tensp']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Dvt']) ?></td>
-                <td class="px-4 py-2 text-right font-semibold"><?= number_format($r['Soluongton']) ?></td>
+            <?php $stt = 1; foreach ($chiTiet as $ct): ?>
+              <tr class="border-t border-white-800">
+                <td class="px-4 py-2"><?= $stt++ ?></td>
+                <td class="px-4 py-2 font-semibold"><?= htmlspecialchars($ct['Masp']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($ct['Tensp']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($ct['Dvt']) ?></td>
+                <td class="px-4 py-2 text-right"><?= number_format($ct['Soluong']) ?></td>
+                <td class="px-4 py-2 text-right"><?= number_format($ct['Dongiaxuat'], 0, ',', '.') ?> đ</td>
+                <td class="px-4 py-2 text-right font-semibold"><?= number_format($ct['Thanhtien'], 0, ',', '.') ?> đ</td>
               </tr>
             <?php endforeach; ?>
+            <tr class="border-t-2 border-gray-70 bg-white-900">
+              <td colspan="6" class="px-4 py-3 text-right font-semibold">Tổng cộng:</td>
+              <td class="px-4 py-3 text-right font-bold text-lg text-emerald-400"><?= number_format($phieuXuat['Tongtienxuat'], 0, ',', '.') ?> đ</td>
+            </tr>
           <?php endif; ?>
         </tbody>
       </table>
     </div>
   </div>
-  </div>
-<script>
+  <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {
     const menu = document.getElementById("submenuSanPham");
     menu.classList.toggle("d-none");
@@ -253,6 +316,8 @@ if (btnPhieuXuat) {
         submenuPhieuXuat.classList.toggle("d-none");
     });
 }
+
+
 </script>
 </body>
 </html>

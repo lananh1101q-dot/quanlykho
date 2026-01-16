@@ -98,7 +98,21 @@ $list= mysqli_query($conn, $sql);
             transition: all 0.3s ease;
         }
         /* --- 1. Header và Nút chức năng --- */
+        /* =========================
+   NỘI DUNG BÊN PHẢI
+========================= */
+
+.main-content {
+    background-color: #f1f3f6;
+    min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
 .header-danh-sach {
+    background: white;
+    padding: 18px 24px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -106,296 +120,170 @@ $list= mysqli_query($conn, $sql);
 }
 
 .tieu-de-chinh {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 600;
     color: #333;
 }
 
-.nhom-nut-chuc-nang .nut {
-    padding: 10px 18px;
-    margin-left: 8px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    color: white;
+/* ===== NÚT TẠO DANH MỤC ===== */
+.nhom-nut-chuc-nang a {
     text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: background-color 0.2s;
+    color: white;
 }
 
 .nut-nhap-excel {
-    background-color: #4CAF50; /* Xanh lá */
+    background: linear-gradient(135deg, #28a745, #218838);
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.nut-xuat-excel {
-    background-color: #3498db; /* Xanh dương */
+.nut-nhap-excel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(40,167,69,0.4);
 }
 
-.nut-tao-moi {
-    background-color: #007bff; /* Xanh đậm */
-}
-
-.nut:hover {
-    filter: brightness(1.1);
-}
-
-/* --- 2. Thanh tìm kiếm và Vùng Thao tác --- */
-.thanh-tim-kiem-loc {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.khung-tim-kiem {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 8px 12px;
-    width: 300px;
-    background-color: #f9f9f9;
-}
-.chia2cot{
-    display: flex; /* Sử dụng flexbox để tạo hai cột */
-    gap: 30px;
+/* ===== FORM TÌM KIẾM ===== */
+form {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     margin-bottom: 20px;
-     align-items: center;
 }
-.cot{
-    flex: 1; /* Mỗi cột chiếm một nửa không gian */
+
+.chia2cot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
 }
 
 .input-tim-kiem {
-    border: none;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: all 0.3s;
+}
+
+.input-tim-kiem:focus {
     outline: none;
-    flex-grow: 1;
-    padding: 0 10px;
-    background-color: transparent;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
 }
 
-.icon-tim-kiem, .icon-loc {
-    color: #999;
+form button[type="submit"] {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
 }
 
-.vung-chon-thao-tac {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 15px;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+form button[type="submit"]:hover {
+    background: #0056b3;
 }
 
-.nut-thao-tac-chung {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* --- 3. Bảng Sản Phẩm --- */
+/* ===== BẢNG ===== */
 .khung-bang-bao-quanh {
-    overflow-x: auto; /* Đảm bảo cuộn nếu bảng quá rộng */
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
 }
 
 .bang-san-pham {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    text-align: left;
-    font-size: 14px;
+    border-collapse: collapse;
 }
 
-.bang-san-pham th, .bang-san-pham td {
-    padding: 14px 15px;
-    border-bottom: 1px solid #f0f0f0;
-    vertical-align: middle;
-}
-
-.bang-san-pham thead th {
-    background-color: #f8f9fa; 
-    font-weight: 600;
-    color: #666;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-size: 12px;
-}
-
-/* Định dạng từng cột */
-.cot-checkbox { width: 30px; text-align: center; }
-.cot-anh { width: 60px; }
-.cot-thao-tac { width: 40px; text-align: center; }
-.anh-sp {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #eee;
-}
-
-/* Chip Danh mục */
-.chip {
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 12px;
-    font-weight: 500;
+.bang-san-pham thead {
+    background: #007bff;
     color: white;
-    display: inline-block;
-    min-width: 80px;
-    text-align: center;
 }
 
-.chip-dien-tu {
-    background-color: #3498db; 
+.bang-san-pham th,
+.bang-san-pham td {
+    padding: 14px 16px;
+    text-align: left;
 }
 
-.chip-gia-dung {
-    background-color: #9b59b6; /* Màu tím */
+.bang-san-pham tbody tr {
+    transition: background 0.2s ease;
 }
 
-/* Giá và Tồn kho */
-.gia-ban, .ton-kho {
-    font-weight: 600;
-    color: #333;
+.bang-san-pham tbody tr:nth-child(even) {
+    background: #f8f9fa;
 }
 
-/* Trạng thái Bán (Icon) */
-.trang-thai {
-    font-size: 18px;
-    display: block;
-    text-align: center;
+.bang-san-pham tbody tr:hover {
+    background: #eef4ff;
 }
 
-.tt-active {
-    color: #2ecc71; /* Xanh lá */
-}
-
-.tt-ban {
-    color: #e74c3c; /* Đỏ */
-}
-
-/* Nút 3 chấm (Menu hành động) */
-.nut-ba-cham {
-    background: none;
-    border: none;
-    color: #999;
-    padding: 5px;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.nut-ba-cham:hover {
-    color: #333;
-    background-color: #f0f0f0;
-    border-radius: 50%;
-}
-
-/* --- 4. Footer và Phân trang --- */
-.footer-phan-trang {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 15px;
-    margin-top: 15px;
-    border-top: 1px solid #eee;
-    font-size: 14px;
-    color: #666;
-}
-
-.phan-trang-chi-tiet button {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    margin: 0 5px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #333;
-}
-
-.phan-trang-chi-tiet button:disabled {
-    cursor: not-allowed;
-    background-color: #f9f9f9;
-    color: #ccc;
-}
-/* --- Sửa đổi phần Cột Thao tác (Thay thế Nút 3 chấm) --- */
-
-/* Cột Thao tác (Header) */
-.cot-hanh-dong-nut {
-    width: 100px; /* Định nghĩa độ rộng rõ ràng hơn */
-    text-align: center;
-}
-
-/* Cell dữ liệu (Body) */
+/* ===== NÚT THAO TÁC ===== */
 .cot-hanh-dong-nut-td {
-    text-align: center;
-    white-space: nowrap; /* Ngăn cách nút bị xuống dòng */
-}
-
-/* Định dạng chung cho nút Sửa/Xóa */
-.nut-hanh-dong {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin: 0 4px;
-    padding: 6px;
-    display: inline-block;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-.nut-hanh-dong:hover {
-    background-color: #f0f0f0;
-}
-
-/* Màu sắc cho từng loại nút */
-.nut-sua i {
-    color: #3498db; /* Sửa màu xanh dương */
-}
-
-.nut-xoa i {
-    color: #e74c3c; /* Xóa màu đỏ */
-}
-.pagination-fixed {
-    position: fixed;
-    bottom: 0;
-    left: 250px; /* đúng bằng width sidebar */
-    right: 0;
-    background: #fff;
-    padding: 10px 20px;
-    border-top: 1px solid #ddd;
-    z-index: 999;
-}
-
-.pagination {
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+    gap: 10px;
+}
+
+.nut-hanh-dong {
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.nut-sua {
+    background: #ffc107;
+}
+
+.nut-sua:hover {
+    background: #e0a800;
+}
+
+.nut-xoa {
+    background: #dc3545;
+}
+
+.nut-xoa:hover {
+    background: #b02a37;
+}
+
+/* ===== PHÂN TRANG ===== */
+.pagination-fixed {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 .pagination a {
-    padding: 6px 12px;
-    border-radius: 4px;
-    background: #f1f1f1;
+    padding: 8px 14px;
+    margin: 0 4px;
+    background: white;
+    border-radius: 6px;
     text-decoration: none;
-    color: #333;
-    font-size: 13px;
+    color: #007bff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s;
+}
+
+.pagination a:hover {
+    background: #007bff;
+    color: white;
 }
 
 .pagination a.active {
     background: #007bff;
-    color: #fff;
+    color: white;
+    font-weight: 600;
 }
 
-.pagination a:hover {
-    background: #0056b3;
-    color: #fff;
-}
+
 
     </style>
 </head>
@@ -459,10 +347,11 @@ $list= mysqli_query($conn, $sql);
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+               <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
                     <li class="nav-item">
-                        <a class="nav-link" href="baocao_banhang.php">
-                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
+                        <a class="nav-link" href="quanly_banhang.php">
+                            <i class="fas fa-cash-register"></i> Quản lý bán hàng
+
                         </a>
                     </li>
                     <li class="nav-item">
@@ -470,11 +359,7 @@ $list= mysqli_query($conn, $sql);
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 

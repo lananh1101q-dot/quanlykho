@@ -7,120 +7,134 @@ if (!isset($_SESSION['user'])) {
 require_once __DIR__ . '/db.php';
 
 // =========================
-// Xử lý xóa phiếu nhập
+// Xử lý xóa phiếu xuất
 // =========================
 if (isset($_GET['xoa']) && !empty($_GET['xoa'])) {
-    $manhap = trim($_GET['xoa']);
+    $maxuat = trim($_GET['xoa']);
     try {
         $pdo->beginTransaction();
         
-        // Lấy thông tin phiếu nhập để lấy Makho
-        $phieuNhap = $pdo->prepare("SELECT Makho FROM Phieunhap WHERE Manhaphang = ?");
-        $phieuNhap->execute([$manhap]);
-        $phieuNhap = $phieuNhap->fetch();
+        // Lấy thông tin phiếu nhập để lấy Makh
+        $phieuXuat = $pdo->prepare("SELECT Makh FROM Phieuxuat WHERE Maxuathang = ?");
+        $phieuXuat->execute([$maxuat]);
+        $phieuXuat = $phieuXuat->fetch();
+
         
-        if ($phieuNhap && $phieuNhap['Makho']) {
-            $makho = $phieuNhap['Makho'];
-            
-            // Lấy chi tiết phiếu nhập để cập nhật lại tồn kho
-            $chiTiet = $pdo->prepare("SELECT Masp, Soluong FROM Chitiet_Phieunhap WHERE Manhaphang = ?");
-            $chiTiet->execute([$manhap]);
-            $chiTietRows = $chiTiet->fetchAll();
-            
-            // Giảm số lượng tồn kho
-            foreach ($chiTietRows as $ct) {
-                $stmtTonkho = $pdo->prepare("
-                    UPDATE Tonkho 
-                    SET Soluongton = Soluongton - :sl
-                    WHERE Makho = :makho AND Masp = :masp AND Soluongton >= :sl_check
-                ");
-                $stmtTonkho->execute([
-                    ':makho' => $makho,
-                    ':masp' => $ct['Masp'],
-                    ':sl' => $ct['Soluong'],
-                    ':sl_check' => $ct['Soluong'],
-                ]);
-            }
-        }
+     // Lấy chi tiết phiếu xuất
+$chiTiet = $pdo->prepare("
+    SELECT Masp, Soluong 
+    FROM Chitiet_Phieuxuat 
+    WHERE Maxuathang = ?
+");
+$chiTiet->execute([$maxuat]);
+$chiTietRows = $chiTiet->fetchAll();
+
+// CỘNG LẠI số lượng tồn kho
+foreach ($chiTietRows as $ct) {
+    $stmtTonkho = $pdo->prepare("
+        UPDATE Tonkho 
+        SET Soluongton = Soluongton + :sl
+        WHERE Masp = :masp
+    ");
+    $stmtTonkho->execute([
+        ':masp' => $ct['Masp'],
+        ':sl'   => $ct['Soluong'],
+    ]);
+}
+
         
-        // Xóa chi tiết phiếu nhập
-        $pdo->prepare("DELETE FROM Chitiet_Phieunhap WHERE Manhaphang = ?")->execute([$manhap]);
-        // Xóa phiếu nhập
-        $pdo->prepare("DELETE FROM Phieunhap WHERE Manhaphang = ?")->execute([$manhap]);
+        // Xóa chi tiết phiếu xuất
+        $pdo->prepare("DELETE FROM Chitiet_Phieuxuat WHERE Maxuathang = ?")->execute([$maxuat]);
+        // Xóa phiếu xuất
+        $pdo->prepare("DELETE FROM Phieuxuat WHERE Maxuathang = ?")->execute([$maxuat]);
         
         $pdo->commit();
-        header("Location: danh_sach_phieu_nhap.php?success=xoa");
+        header("Location: danh_sach_phieu_xuat.php?success=xoa");
         exit;
     } catch (Exception $e) {
         $pdo->rollBack();
-        header("Location: danh_sach_phieu_nhap.php?error=" . urlencode($e->getMessage()));
+        header("Location: danh_sach_phieu_xoa.php?error=" . urlencode($e->getMessage()));
         exit;
     }
 }
 
-// =========================
+
 // Bộ lọc tìm kiếm
 // =========================
-$maSearch     = trim($_GET['ma'] ?? '');
-$nccSearch    = trim($_GET['mancc'] ?? '');
-$khoSearch    = trim($_GET['makho'] ?? '');
-$dateFrom     = trim($_GET['from'] ?? '');
-$dateTo       = trim($_GET['to'] ?? '');
+$maSearch   = trim($_GET['ma'] ?? '');      // Mã phiếu xuất
+$khSearch   = trim($_GET['makh'] ?? '');    // Mã khách hàng
+$spSearch   = trim($_GET['masp'] ?? '');    //  Mã sản phẩm (MỚI)
+$dateFrom  = trim($_GET['from'] ?? '');
+$dateTo    = trim($_GET['to'] ?? '');
 
-// Lấy danh sách NCC & Kho cho dropdown lọc
-$nhacungcaps = $pdo->query("SELECT Mancc, Tenncc FROM Nhacungcap ORDER BY Tenncc")->fetchAll();
-$khos        = $pdo->query("SELECT Makho, Tenkho FROM Kho ORDER BY Tenkho")->fetchAll();
+
+// Lấy danh sách Khách hàng cho dropdown lọc 
+$khachhangs = $pdo->query("
+    SELECT Makh, Tenkh 
+    FROM Khachhang 
+    ORDER BY Tenkh
+")->fetchAll();
 
 // Xây dựng SQL với điều kiện lọc
-$sql = "SELECT pn.*, ncc.Tenncc, k.Tenkho,
-        (SELECT COUNT(*) FROM Chitiet_Phieunhap WHERE Manhaphang = pn.Manhaphang) as SoMatHang
-        FROM Phieunhap pn
-        LEFT JOIN Nhacungcap ncc ON pn.Mancc = ncc.Mancc
-        LEFT JOIN Kho k ON pn.Makho = k.Makho
-        WHERE 1=1";
+$sql = "
+SELECT DISTINCT px.*, kh.Tenkh,
+    (SELECT COUNT(*)
+     FROM Chitiet_Phieuxuat ct2
+     WHERE ct2.Maxuathang = px.Maxuathang) AS SoMatHang
+FROM Phieuxuat px
+LEFT JOIN Khachhang kh ON px.Makh = kh.Makh
+LEFT JOIN Chitiet_Phieuxuat ct ON ct.Maxuathang = px.Maxuathang
+WHERE 1=1
+";
+
 
 $params = [];
 
+// Tìm theo mã phiếu xuất
 if ($maSearch !== '') {
-    $sql .= " AND pn.Manhaphang LIKE :ma";
+    $sql .= " AND px.Maxuathang LIKE :ma";
     $params[':ma'] = '%' . $maSearch . '%';
 }
-
-if ($nccSearch !== '') {
-    $sql .= " AND pn.Mancc = :mancc";
-    $params[':mancc'] = $nccSearch;
+// Tìm theo mã sản phẩm
+if ($spSearch !== '') {
+    $sql .= " AND ct.Masp LIKE :masp";
+    $params[':masp'] = '%' . $spSearch . '%';
+}
+// Tìm theo khách hàng
+if ($khSearch !== '') {
+    $sql .= " AND px.Makh = :makh";
+    $params[':makh'] = $khSearch;
 }
 
-if ($khoSearch !== '') {
-    $sql .= " AND pn.Makho = :makho";
-    $params[':makho'] = $khoSearch;
-}
-
+// Từ ngày xuất
 if ($dateFrom !== '') {
-    $sql .= " AND pn.Ngaynhaphang >= :from";
+    $sql .= " AND px.Ngayxuat >= :from";
     $params[':from'] = $dateFrom;
 }
 
+// Đến ngày xuất
 if ($dateTo !== '') {
-    $sql .= " AND pn.Ngaynhaphang <= :to";
+    $sql .= " AND px.Ngayxuat <= :to";
     $params[':to'] = $dateTo;
 }
 
-$sql .= " ORDER BY pn.Ngaynhaphang DESC, pn.Manhaphang DESC";
+
+$sql .= " ORDER BY px.Ngayxuat DESC, px.Maxuathang DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-$phieuNhaps = $stmt->fetchAll();
+$phieuXuats = $stmt->fetchAll();
 
 $success = $_GET['success'] ?? '';
 $error = $_GET['error'] ?? '';
 ?>
 <!doctype html>
 <html lang="vi">
+    
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Danh sách phiếu nhập</title>
+  <title>Danh sách phiếu xuất</title>
   <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -187,77 +201,6 @@ $error = $_GET['error'] ?? '';
         #submenuSanPham {
             transition: all 0.3s ease;
         }
-        /* ===== DARK -> LIGHT (NỀN TRẮNG, CHỮ ĐEN) ===== */
-
-/* Nền tổng */
-body {
-    background-color: #f8f9fa !important;
-}
-
-/* Nội dung chính */
-.main-content {
-    background-color: #f8f9fa !important;
-    color: #212529 !important;
-}
-
-/* Card / form / box */
-.bg-slate-800,
-.bg-slate-900 {
-    background-color: #ffffff !important;
-}
-
-/* Border */
-.border-slate-700,
-.border-slate-800 {
-    border-color: #dee2e6 !important;
-}
-
-/* Text Tailwind */
-.text-slate-200,
-.text-slate-300,
-.text-slate-400 {
-    color: #495057 !important;
-}
-
-/* Tiêu đề */
-h1, h2, h3, h4, h5 {
-    color: #212529 !important;
-}
-
-/* Input / select / textarea */
-input,
-select,
-textarea {
-    background-color: #ffffff !important;
-    color: #212529 !important;
-}
-
-/* Placeholder */
-input::placeholder,
-textarea::placeholder {
-    color: #6c757d !important;
-}
-
-/* Table */
-thead.bg-slate-900 {
-    background-color: #f1f3f5 !important;
-    color: #212529 !important;
-}
-
-tbody tr {
-    color: #212529 !important;
-}
-
-tbody tr:hover {
-    background-color: #f8f9fa !important;
-}
-
-/* Ghi chú trong bảng */
-td.text-slate-400 {
-    color: #6c757d !important;
-}
-
-
     </style>
 </head>
 <body>
@@ -362,19 +305,19 @@ td.text-slate-400 {
   <div class="max-w-7xl mx-auto p-6 space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold">Danh sách phiếu nhập</h1>
-        <p class="text-slate-400 text-sm mt-1">Quản lý các phiếu nhập kho</p>
+        <h1 class="text-2xl font-bold">Danh sách phiếu xuất</h1>
+        <p class="text-slate-400 text-sm mt-1">Quản lý các phiếu xuất kho</p>
       </div>
       <div class="flex gap-2 text-sm">
-        <a href="phieu_nhap.php" class="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 font-semibold">+ Tạo phiếu nhập</a>
-        <a href="danh_sach_phieu_nhap.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
+        <a href="phieu_xuat.php" class="px-4 py-2 rounded bg-white-600 hover:bg-white-700 font-semibold"></a>
+        <a href="dashboard.php" class="px-3 py-2 rounded bg-white-800 hover:bg-white-700"></a>
+        <a href="logout.php" class="px-3 py-2 rounded bg-white-600 hover:bg-white-700"></a>
       </div>
     </div>
 
     <?php if ($success === 'xoa'): ?>
       <div class="bg-emerald-900/60 border border-emerald-700 text-emerald-100 px-4 py-3 rounded">
-        Đã xóa phiếu nhập thành công.
+        Đã xóa phiếu xuất thành công.
       </div>
     <?php endif; ?>
 
@@ -385,61 +328,79 @@ td.text-slate-400 {
     <?php endif; ?>
 
     <!-- Form tìm kiếm -->
-    <form method="get" class="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-3 text-sm">
-      <div class="grid md:grid-cols-5 gap-3">
-        <div>
-          <label class="block text-slate-300 mb-1">Mã phiếu</label>
-          <input name="ma" value="<?= htmlspecialchars($maSearch) ?>" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" placeholder="Nhập mã phiếu..." />
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">Nhà cung cấp</label>
-          <select name="mancc" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
-            <option value="">-- Tất cả --</option>
-            <?php foreach ($nhacungcaps as $ncc): ?>
-              <option value="<?= htmlspecialchars($ncc['Mancc']) ?>" <?= $nccSearch === $ncc['Mancc'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($ncc['Tenncc']) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">Kho</label>
-          <select name="makho" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700">
-            <option value="">-- Tất cả --</option>
-            <?php foreach ($khos as $kho): ?>
-              <option value="<?= htmlspecialchars($kho['Makho']) ?>" <?= $khoSearch === $kho['Makho'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($kho['Tenkho']) ?> [<?= htmlspecialchars($kho['Makho']) ?>]
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">Từ ngày</label>
-          <input type="date" name="from" value="<?= htmlspecialchars($dateFrom) ?>" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">Đến ngày</label>
-          <input type="date" name="to" value="<?= htmlspecialchars($dateTo) ?>" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
-        </div>
-      </div>
-      <div class="flex items-center gap-2 pt-1">
-        <button type="submit" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-slate-900 font-semibold">
-          Tìm kiếm
-        </button>
-        <a href="danh_sach_phieu_nhap.php" class="px-3 py-2 rounded bg-slate-700 hover:bg-slate-600 text-slate-100">
-          Xóa lọc
-        </a>
-      </div>
-    </form>
+<form method="get" class="bg-white-800 border border-white-700 rounded-lg p-4 space-y-3 text-sm">
+  <div class="grid md:grid-cols-5 gap-3">
 
-    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-auto">
+    <!-- Mã phiếu xuất -->
+    <div>
+      <label class="block text-black-300 mb-1">Mã phiếu xuất</label>
+      <input name="ma"
+             value="<?= htmlspecialchars($maSearch) ?>"
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700"
+             placeholder="Nhập mã phiếu xuất..." />
+    </div>
+
+    <!-- Khách hàng -->
+    <div>
+      <label class="block text-black-300 mb-1">Khách hàng</label>
+      <select name="makh" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
+        <option value="">-- Tất cả --</option>
+        <?php foreach ($khachhangs as $kh): ?>
+          <option value="<?= $kh['Makh'] ?>"
+            <?= ($khSearch === $kh['Makh']) ? 'selected' : '' ?>>
+            <?= htmlspecialchars($kh['Tenkh']) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+
+    <!-- Mã sản phẩm -->
+    <div>
+      <label class="block text-black-300 mb-1">Mã sản phẩm</label>
+      <input name="masp"
+             value="<?= htmlspecialchars($spSearch) ?>"
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700"
+             placeholder="Nhập mã sản phẩm..." />
+    </div>
+
+    <!-- Từ ngày -->
+    <div>
+      <label class="block text-black-300 mb-1">Từ ngày</label>
+      <input type="date" name="from"
+             value="<?= htmlspecialchars($dateFrom) ?>"
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" />
+    </div>
+
+    <!-- Đến ngày -->
+    <div>
+      <label class="block text-black-300 mb-1">Đến ngày</label>
+      <input type="date" name="to"
+             value="<?= htmlspecialchars($dateTo) ?>"
+             class="w-full px-3 py-2 rounded bg-white-900 border border-white-700" />
+    </div>
+
+  </div>
+
+  <div class="flex items-center gap-2 pt-1">
+    <button type="submit"
+            class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white-900 font-semibold">
+      Tìm kiếm
+    </button>
+    <a href="danh_sach_phieu_xuat.php"
+       class="px-3 py-2 rounded bg-red-700 hover:bg-red-600 text-white-100">
+      Xóa lọc
+    </a>
+  </div>
+</form>
+
+
+    <div class="bg-white-800 rounded-lg border border-slate-700 overflow-auto">
       <table class="min-w-full text-sm">
-        <thead class="bg-slate-900 text-slate-300">
+        <thead class="bg-black-900 text-black-300">
           <tr>
             <th class="px-4 py-3 text-left">Mã phiếu</th>
-            <th class="px-4 py-3 text-left">Nhà cung cấp</th>
-            <th class="px-4 py-3 text-left">Kho</th>
-            <th class="px-4 py-3 text-left">Ngày nhập</th>
+            <th class="px-4 py-3 text-left">Khách hàng</th>
+            <th class="px-4 py-3 text-left">Ngày xuất</th>
             <th class="px-4 py-3 text-right">Số mặt hàng</th>
             <th class="px-4 py-3 text-right">Tổng tiền</th>
             <th class="px-4 py-3 text-left">Ghi chú</th>
@@ -447,24 +408,23 @@ td.text-slate-400 {
           </tr>
         </thead>
         <tbody>
-          <?php if (empty($phieuNhaps)): ?>
-            <tr><td colspan="8" class="px-4 py-4 text-center text-slate-400">Chưa có phiếu nhập nào.</td></tr>
+          <?php if (empty($phieuXuats)): ?>
+            <tr><td colspan="8" class="px-4 py-4 text-center text-black-400">Chưa có phiếu xuất nào.</td></tr>
           <?php else: ?>
-            <?php foreach ($phieuNhaps as $pn): ?>
+            <?php foreach ($phieuXuats as $px): ?>
               <tr class="border-t border-slate-800 hover:bg-slate-700/50">
-                <td class="px-4 py-2 font-semibold"><?= htmlspecialchars($pn['Manhaphang']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($pn['Tenncc'] ?? 'N/A') ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($pn['Tenkho'] ?? 'N/A') ?></td>
-                <td class="px-4 py-2"><?= date('d/m/Y', strtotime($pn['Ngaynhaphang'])) ?></td>
-                <td class="px-4 py-2 text-right"><?= number_format($pn['SoMatHang']) ?></td>
-                <td class="px-4 py-2 text-right font-semibold"><?= number_format($pn['Tongtiennhap'], 0, ',', '.') ?> đ</td>
-                <td class="px-4 py-2 text-slate-400"><?= htmlspecialchars(mb_substr($pn['Ghichu'] ?? '', 0, 50)) ?><?= mb_strlen($pn['Ghichu'] ?? '') > 50 ? '...' : '' ?></td>
+                <td class="px-4 py-2 font-semibold"><?= htmlspecialchars($px['Maxuathang']) ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($px['Tenkh'] ?? 'N/A') ?></td>
+                <td class="px-4 py-2"><?= date('d/m/Y', strtotime($px['Ngayxuat'])) ?></td>
+                <td class="px-4 py-2 text-right"><?= number_format($px['SoMatHang']) ?></td>
+                <td class="px-4 py-2 text-right font-semibold"><?= number_format($px['Tongtienxuat'], 0, ',', '.') ?> đ</td>
+                <td class="px-4 py-2 text-slate-400"><?= htmlspecialchars(mb_substr($px['Ghichu'] ?? '', 0, 50)) ?><?= mb_strlen($px['Ghichu'] ?? '') > 50 ? '...' : '' ?></td>
                 <td class="px-4 py-2">
                   <div class="flex items-center justify-center gap-2">
-                    <a href="sua_phieu_nhap.php?id=<?= urlencode($pn['Manhaphang']) ?>" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-xs font-semibold">Sửa</a>
-                    <a href="chi_tiet_phieu_nhap.php?id=<?= urlencode($pn['Manhaphang']) ?>" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold">Chi tiết</a>
-                    <a href="?xoa=<?= urlencode($pn['Manhaphang']) ?>" 
-                       onclick="return confirm('Bạn có chắc chắn muốn xóa phiếu nhập này? Hành động này sẽ giảm số lượng tồn kho.')" 
+                    <a href="sua_phieu_xuat.php?id=<?= urlencode($px['Maxuathang']) ?>" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-xs font-semibold">Sửa</a>
+                    <a href="chi_tiet_phieu_xuat.php?id=<?= urlencode($px['Maxuathang']) ?>" class="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold">Chi tiết</a>
+                    <a href="?xoa=<?= urlencode($px['Maxuathang']) ?>" 
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa phiếu xuất này? Hành động này sẽ tăng số lượng tồn kho.')" 
                        class="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-xs font-semibold">Xóa</a>
                   </div>
                 </td>
@@ -501,6 +461,7 @@ if (btnPhieuXuat) {
         submenuPhieuXuat.classList.toggle("d-none");
     });
 }
+
 </script>
 </body>
 </html>

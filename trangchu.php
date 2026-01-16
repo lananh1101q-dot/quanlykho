@@ -108,8 +108,7 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
     </style>
 </head>
 <body>
-
-   <nav class="sidebar">
+    <nav class="sidebar">
         <div class="text-center mb-4">
             <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
           </div>
@@ -142,7 +141,8 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
                 </ul>
             </li>
 
- <li class="nav-item">
+
+            <li class="nav-item">
               <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
                   <i class="fas fa-file-import"></i> Phiếu nhập kho
                   <i class="fas fa-chevron-down float-end"></i>
@@ -161,28 +161,38 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
                   </li>
               </ul>
           </li>
+          <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                  <i class="fas fa-file-import"></i> Phiếu xuất
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
+
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu xuất
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_xuat.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
                 <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_banhang.php">
-                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
-                        </a>
-                    </li>
+            
                     <li class="nav-item">
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 
@@ -248,7 +258,14 @@ if (btnPhieuNhap) {
         submenuPhieuNhap.classList.toggle("d-none");
     });
 }
+const btnPhieuXuat = document.getElementById("btnPhieuXuat");
+const submenuPhieuXuat = document.getElementById("submenuPhieuXuat");
 
+if (btnPhieuXuat) {
+    btnPhieuXuat.addEventListener("click", function () {
+        submenuPhieuXuat.classList.toggle("d-none");
+    });
+}
 </script>
 </body>
 </html>

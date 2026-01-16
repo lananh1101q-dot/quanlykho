@@ -1,4 +1,4 @@
-CREATE DATABASE QuanLyKho 
+CREATE DATABASE QuanLyKho;
 USE QuanLyKho;
 
 

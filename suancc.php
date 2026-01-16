@@ -1,48 +1,62 @@
 <?php
 $conn = mysqli_connect("localhost", "root", "", "quanlykho");
+$sql_danhmuc = "SELECT Madm, Tendm FROM Danhmucsp ORDER BY Tendm ASC";
+$result_danhmuc = mysqli_query($conn, $sql_danhmuc); // Lấy danh mục để hiển thị trong dropdown
 
-if (isset($_POST['taophieu'])) {
-    $maxuathang = $_POST['maxuathang'];
-    $makh = $_POST['makh'];
-    $ngay = date('Y-m-d');
+$Mancc = isset($_GET['Mancc']) ? $_GET['Mancc'] : '';
 
-    mysqli_query($conn,
-        "INSERT INTO Phieuxuat(Maxuathang, Makh, Ngayxuat, Tongtienxuat)
-         VALUES ('$maxuathang','$makh','$ngay',0)");
+$sql = "SELECT * FROM Nhacungcap WHERE Mancc = '$Mancc'";
+$result = mysqli_query($conn, $sql);
+$row = mysqli_fetch_assoc($result); // Lấy dữ liệu nhà cung cấp
+if (!$row) {
+    die("Không tìm thấy nhà cung cấp!");
 }
 
-if (isset($_POST['themsanpham'])) {
-    $px = $_POST['maxuathang'];
-    $masp = $_POST['masp'];
-    $soluong = (int)$_POST['soluong'];
 
-    $sp = mysqli_fetch_assoc(mysqli_query($conn,
-        "SELECT Giaban FROM Sanpham WHERE Masp='$masp'"));
-    $dongia = $sp['Giaban'];
-    $thanhtien = $soluong * $dongia;
+// ===============================
+// XỬ LÝ LƯU (BACKEND)
+// ===============================
+if (isset($_POST['btnluu'])) {
 
-    mysqli_query($conn,
-        "INSERT INTO Chitiet_Phieuxuat(Maxuathang,Masp,Soluong,Dongiaxuat)
-         VALUES('$px','$masp','$soluong','$dongia')");
+    $Mancc   = trim($_POST['Mancc']);
+    $Tenncc  = trim($_POST['Tenncc']);
+  
+    $Sdt   = $_POST['Sdtncc'];
+    $Diachi   = $_POST['Diachincc'];
+   
 
-    mysqli_query($conn,
-        "UPDATE Tonkho SET Soluongton = Soluongton - $soluong WHERE Masp='$masp'");
+    // --- Validate backend ---
+    if ($Mancc == "" || $Tenncc == "" || $Sdt == "" || $Diachi == "") {
+        echo "<script>alert('Vui lòng nhập đầy đủ thông tin!');</script>";
+    } 
+    // Kiểm tra số điện thoại có phải là số không 
+    elseif (!is_numeric($Sdt)) {
+        echo "<script>alert('Số điện thoại phải là số!');</script>";
+    } else {
 
-    mysqli_query($conn,
-        "UPDATE Phieuxuat 
-         SET Tongtienxuat = Tongtienxuat + $thanhtien
-         WHERE Maxuathang='$px'");
+     
+
+            // --- Insert ---
+            $sql = " UPDATE Nhacungcap SET  Tenncc='$Tenncc', Sdtncc='$Sdt', Diachincc='$Diachi'
+                    WHERE Mancc='$Mancc'";
+
+            if (mysqli_query($conn, $sql)) {
+                echo "<script>alert('thông cong!'); window.location.href='Nhacungcap.php';</script>";
+                
+            } else {
+                echo "<script>alert('Lỗi thêm sản phẩm!');</script>";
+            }
+        
+    }
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Phiếu xuất</title>
-</head>
-<body>
-<h2>Phiếu xuất bán hàng</h2>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Đơn Giản</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
        <style>
         body { 
@@ -107,6 +121,28 @@ if (isset($_POST['themsanpham'])) {
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        
+
+        /* 4. Style cho nội dung bên trong */
+        ul { list-style: none; }
+        li a { color: #bdc3c7; text-decoration: none; line-height: 2.5; display: block; }
+        li a:hover { color: #ff4d4d; }
+
+        .row { margin-bottom: 15px; }
+        .row label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .row input, .row select { width: 100%; padding: 10px; border: 1px solid #ccc; }
+        .nut {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+        .btn { background: #ff4d4d; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 10%; font-weight: bold; }
+        .btn:hover { background: #333; }
     </style>
 </head>
 <body>
@@ -163,28 +199,38 @@ if (isset($_POST['themsanpham'])) {
                   </li>
               </ul>
           </li>
+          <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                  <i class="fas fa-file-import"></i> Phiếu xuất
+                  <i class="fas fa-chevron-down float-end"></i>
+              </a>
+
+              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                  <li class="nav-item">
+                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
+                          <i class="fas fa-list"></i> Danh sách phiếu xuất
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="phieu_xuat.php">
+                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
+                      </a>
+                  </li>
+              </ul>
+          </li>
             <li class="nav-item">
                 <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                     <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                     <i class="fas fa-chevron-down float-end"></i>
                 </a>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_banhang.php">
-                            <i class="fas fa-cash-register"></i> Báo cáo bán hàng
-                        </a>
-                    </li>
+            
                     <li class="nav-item">
                         <a class="nav-link" href="tonkho.php">
                             <i class="fas fa-warehouse"></i> Báo cáo tồn kho
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="baocao_khachhang.php">
-                            <i class="fas fa-users"></i> Báo cáo khách hàng
-                        </a>
-                    </li>
+                  
                 </ul>
             </li>
 
@@ -198,22 +244,37 @@ if (isset($_POST['themsanpham'])) {
     </nav>
 
     <div class="main-content">
-<form method="post">
-    Mã PX <input name="maxuathang" required>
-    Mã KH <input name="makh" required>
-    <button name="taophieu">Tạo phiếu</button>
-</form>
+            <h3 style="margin-bottom: 20px;">NHẬP THÔNG TIN VẬT TƯ</h3>
+            <form method="POST">
+            <div class="row">
+                <label>Mã số:</label>
+                <input type="text" name="Mancc" placeholder="Ví dụ: MS01" value="<?php echo $row['Mancc'] ?>" readonly>
+            </div>
 
-<hr>
+            <div class="row">
+                <label>Tên vật tư:</label>
+                <input type="text" name="Tenncc" placeholder="Thép, xi măng..." value="<?php echo $row['Tenncc'] ?>">
+            </div>
+        
 
-<form method="post">
-    Mã PX <input name="maxuathang" required>
-    Mã SP <input name="masp" required>
-    Số lượng <input type="number" name="soluong" required>
-    <button name="themsanpham">Thêm sản phẩm</button>
-</form>
-</div>
-<script>
+            <div class="row">
+                <label>Số điện thoại:</label>
+                <input type="text" name="Sdtncc" value="<?php echo $row['Sdtncc'] ?>">
+            </div>
+              <div class="row">
+                <label>Địa chỉ:</label>
+                <input type="text" name="Diachincc" value="<?php echo $row['Diachincc'] ?>">
+            </div>
+            
+           <div class="layout-chia-doi">
+             <a class="nut btn" href="Nhacungcap.php">hủy</a>
+            <button type="submit" name="btnluu" class="nut btn">thay đổi</button>
+            </div>
+            </form>
+        </div>
+
+    </div>
+        <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {
     const menu = document.getElementById("submenuSanPham");
     menu.classList.toggle("d-none");
@@ -230,7 +291,17 @@ if (btnPhieuNhap) {
         submenuPhieuNhap.classList.toggle("d-none");
     });
 }
+const btnPhieuXuat = document.getElementById("btnPhieuXuat");
+const submenuPhieuXuat = document.getElementById("submenuPhieuXuat");
 
+if (btnPhieuXuat) {
+    btnPhieuXuat.addEventListener("click", function () {
+        submenuPhieuXuat.classList.toggle("d-none");
+    });
+}
 </script>
+
+    
+
 </body>
 </html>

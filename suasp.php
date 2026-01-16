@@ -1,26 +1,63 @@
 <?php
-session_start();
-if (!isset($_SESSION['user'])) {
-    header('Location: dangnhap.php');
-    exit;
-}
-require_once __DIR__ . '/db.php';
+$conn = mysqli_connect("localhost", "root", "", "quanlykho");
+$sql_danhmuc = "SELECT Madm, Tendm FROM Danhmucsp ORDER BY Tendm ASC";
+$result_danhmuc = mysqli_query($conn, $sql_danhmuc); // Lấy danh mục để hiển thị trong dropdown
 
-$sql = "SELECT tk.Makho, k.Tenkho, tk.Masp, sp.Tensp, sp.Dvt, tk.Soluongton
-        FROM Tonkho tk
-        JOIN Kho k ON tk.Makho = k.Makho
-        JOIN Sanpham sp ON tk.Masp = sp.Masp
-        ORDER BY k.Tenkho, sp.Tensp";
-$rows = $pdo->query($sql)->fetchAll();
+$Masp = isset($_GET['Masp']) ? $_GET['Masp'] : '';
+
+$sql = "SELECT * FROM Sanpham WHERE Masp = '$Masp'";
+$result = mysqli_query($conn, $sql);
+$row = mysqli_fetch_assoc($result); // Lấy dữ liệu sản phẩm
+
+if (!$row) {
+    die("Không tìm thấy sản phẩm!");
+}
+
+
+// ===============================
+// XỬ LÝ LƯU (BACKEND)
+// ===============================
+if (isset($_POST['btnluu'])) {
+
+    $Masp   = trim($_POST['Masp']);
+    $Tensp  = trim($_POST['Tensp']);
+  
+    $Madm   = $_POST['Madm'];
+    $dvt = str_replace(',', '', $_POST['Dvt']);
+    $giaban = str_replace(',', '', $_POST['Giaban']);
+   
+
+    // --- Validate backend ---
+    if ($Masp == "" || $Tensp == "" || $Madm == "" || $dvt == "" || $giaban == "") {
+        echo "<script>alert('Vui lòng nhập đầy đủ thông tin!');</script>";
+    } 
+    elseif (!is_numeric($giaban)) {
+        echo "<script>alert('Giá bán phải là số!');</script>";
+    } else {
+
+     
+
+            // --- Insert ---
+            $sql = " UPDATE Sanpham SET  Tensp='$Tensp', Madm='$Madm', Dvt='$dvt', Giaban=$giaban
+                    WHERE Masp='$Masp'";
+
+            if (mysqli_query($conn, $sql)) {
+                echo "<script>alert('thông cong!'); window.location.href='Sanpham.php';</script>";
+                
+            } else {
+                echo "<script>alert('Lỗi thêm sản phẩm!');</script>";
+            }
+        
+    }
+}
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Báo cáo tồn kho</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Đơn Giản</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
        <style>
         body { 
@@ -85,6 +122,28 @@ $rows = $pdo->query($sql)->fetchAll();
         #submenuSanPham {
             transition: all 0.3s ease;
         }
+        
+
+        /* 4. Style cho nội dung bên trong */
+        ul { list-style: none; }
+        li a { color: #bdc3c7; text-decoration: none; line-height: 2.5; display: block; }
+        li a:hover { color: #ff4d4d; }
+
+        .row { margin-bottom: 15px; }
+        .row label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .row input, .row select { width: 100%; padding: 10px; border: 1px solid #ccc; }
+        .nut {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+        .btn { background: #ff4d4d; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 10%; font-weight: bold; }
+        .btn:hover { background: #333; }
     </style>
 </head>
 <body>
@@ -186,49 +245,51 @@ $rows = $pdo->query($sql)->fetchAll();
     </nav>
 
     <div class="main-content">
-  <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold">Báo cáo tồn kho</h1>
-        <p class="text-slate-400 text-sm mt-1">Danh sách tồn kho theo kho và sản phẩm</p>
-      </div>
-      <div class="flex gap-2 text-sm">
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
-      </div>
-    </div>
+            <h3 style="margin-bottom: 20px;">NHẬP THÔNG TIN VẬT TƯ</h3>
+            <form method="POST">
+            <div class="row">
+                <label>Mã số:</label>
+                <input type="text" name="Masp" placeholder="Ví dụ: MS01" value="<?php echo $row['Masp'] ?>" readonly>
+            </div>
 
-    <div class="flex items-center justify-between">
-      <table class="min-w-full text-sm">
-        <thead class="bg-slate-900 text-slate-300">
-          <tr>
-            <th class="px-4 py-3 text-left">Kho</th>
-            <th class="px-4 py-3 text-left">Mã SP</th>
-            <th class="px-4 py-3 text-left">Tên sản phẩm</th>
-            <th class="px-4 py-3 text-left">ĐVT</th>
-            <th class="px-4 py-3 text-right">Số lượng tồn</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (empty($rows)): ?>
-            <tr><td colspan="5" class="px-4 py-4 text-center text-slate-400">Chưa có dữ liệu tồn kho.</td></tr>
-          <?php else: ?>
-            <?php foreach ($rows as $r): ?>
-              <tr class="border-t border-slate-800">
-                <td class="px-4 py-2">[<?= htmlspecialchars($r['Makho']) ?>] <?= htmlspecialchars($r['Tenkho']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Masp']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Tensp']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Dvt']) ?></td>
-                <td class="px-4 py-2 text-right font-semibold"><?= number_format($r['Soluongton']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+            <div class="row">
+                <label>Tên vật tư:</label>
+                <input type="text" name="Tensp" placeholder="Thép, xi măng..." value="<?php echo $row['Tensp'] ?>">
+            </div>
+                        <div class="row">
+                <label>Danh mục:</label>
+                    <select name="Madm">
+                        <option value="">-- Chọn danh mục --</option>
+                        <?php while ($dm = mysqli_fetch_assoc($result_danhmuc)): ?>
+                            <option value="<?= $dm['Madm'] ?>"
+                                <?= ($dm['Madm'] == $row['Madm']) ? "selected" : "" ?>>
+                                <?= $dm['Tendm'] ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+
+            </div>
+
+        
+
+            <div class="row">
+                <label>Đơn vị tính:</label>
+                <input type="text" name="Dvt" value="<?php echo $row['Dvt'] ?>">
+            </div>
+              <div class="row">
+                <label>Giá bán:</label>
+                <input type="number" name="Giaban" value="<?php echo $row['Giaban'] ?>">
+            </div>
+            
+           <div class="layout-chia-doi">
+             <a class="nut btn" href="Sanpham.php">hủy</a>
+            <button type="submit" name="btnluu" class="nut btn">thay đổi</button>
+            </div>
+            </form>
+        </div>
+
     </div>
-  </div>
-  </div>
-<script>
+        <script>
 document.getElementById("btnSanPham").addEventListener("click", function () {
     const menu = document.getElementById("submenuSanPham");
     menu.classList.toggle("d-none");
@@ -254,5 +315,8 @@ if (btnPhieuXuat) {
     });
 }
 </script>
+
+    
+
 </body>
 </html>
