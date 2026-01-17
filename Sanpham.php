@@ -292,6 +292,7 @@ if (!$list) {
         .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; background: #e8f0fe; color: #1967d2; }
         .nut-hanh-dong { color: #888; margin: 0 5px; cursor: pointer; text-decoration: none; }
         .nut-hanh-dong:hover { color: #ff4d4d; }
+        
         .pagination-fixed {
             position: fixed;
             bottom: 0;
@@ -303,11 +304,9 @@ if (!$list) {
             z-index: 999;
         }
 
-        .pagination {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
+        .pagination{
+    justify-content:center;
+}
 
         .pagination a {
             padding: 6px 12px;
@@ -328,219 +327,283 @@ if (!$list) {
             color: #fff;
         }
 
+        .header-danh-sach{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.tieu-de-chinh{
+    font-weight:700;
+    color:#333;
+}
+
+.chia2cot{
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:20px;
+    background:#fff;
+    padding:15px;
+    border-radius:8px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom:15px;
+}
+
+.input-tim-kiem{
+    padding:10px 12px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    width:100%;
+}
+
+.khung-bang-bao-quanh{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    overflow:hidden;
+}
+
+.bang-san-pham{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.bang-san-pham th{
+    background:#f1f3f5;
+    text-transform:uppercase;
+    font-size:13px;
+}
+
+.bang-san-pham td,
+.bang-san-pham th{
+    padding:14px;
+    border-bottom:1px solid #eee;
+}
+
+
 
        
     </style>
 </head>
 <body>
-    <nav class="sidebar">
-        <div class="text-center mb-4">
-            <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
-          </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
-            </li>
-           <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
-                    <i class="fas fa-box"></i> Quản lý sản phẩm
-                    <i class="fas fa-chevron-down float-end"></i>
-                </a>
+   <nav class="sidebar">
+    <div class="text-center mb-4">
+        <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
+        </li>
 
-                <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
-                    <li class="nav-item">
-                        <a class="nav-link" href="Sanpham.php">
-                            <i class="fas fa-cube"></i> Sản phẩm
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="dmsp.php">
-                            <i class="fas fa-tags"></i> Danh mục sản phẩm
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="Nhacungcap.php">
-                            <i class="fas fa-truck"></i> Nhà cung cấp
-                        </a>
-                    </li>
-                </ul>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
+                <i class="fas fa-box"></i> Quản lý sản phẩm
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
+                <li class="nav-item"><a class="nav-link" href="Sanpham.php"><i class="fas fa-cube"></i> Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="dmsp.php"><i class="fas fa-tags"></i> Danh mục sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="Nhacungcap.php"><i class="fas fa-truck"></i> Nhà cung cấp</a></li>
+            </ul>
+        </li>
 
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
+                <i class="fas fa-file-import"></i> Phiếu nhập kho
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
+                <li class="nav-item"><a class="nav-link" href="danh_sach_phieu_nhap.php"><i class="fas fa-list"></i> Danh sách phiếu nhập</a></li>
+                <li class="nav-item"><a class="nav-link" href="phieu_nhap.php"><i class="fas fa-plus-circle"></i> Tạo phiếu nhập</a></li>
+            </ul>
+        </li>
 
-            <li class="nav-item">
-              <a class="nav-link" href="javascript:void(0)" id="btnPhieuNhap">
-                  <i class="fas fa-file-import"></i> Phiếu nhập kho
-                  <i class="fas fa-chevron-down float-end"></i>
-              </a>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
+                <i class="fas fa-file-export"></i> Phiếu xuất <!-- Đã sửa icon đúng -->
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
+                <li class="nav-item"><a class="nav-link" href="danh_sach_phieu_xuat.php"><i class="fas fa-list"></i> Danh sách phiếu xuất</a></li>
+                <li class="nav-item"><a class="nav-link" href="phieu_xuat.php"><i class="fas fa-plus-circle"></i> Tạo phiếu xuất</a></li>
+            </ul>
+        </li>
 
-              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuNhap">
-                  <li class="nav-item">
-                      <a class="nav-link" href="danh_sach_phieu_nhap.php">
-                          <i class="fas fa-list"></i> Danh sách phiếu nhập
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="phieu_nhap.php">
-                          <i class="fas fa-plus-circle"></i> Tạo phiếu nhập
-                      </a>
-                  </li>
-              </ul>
-          </li>
-          <li class="nav-item">
-              <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
-                  <i class="fas fa-file-import"></i> Phiếu xuất
-                  <i class="fas fa-chevron-down float-end"></i>
-              </a>
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao"> <!-- ĐÃ SỬA: thêm ul đúng id -->
+                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-warehouse"></i> Báo cáo tồn kho</a></li>
+            </ul>
+        </li>
 
-              <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
-                  <li class="nav-item">
-                      <a class="nav-link" href="danh_sach_phieu_xuat.php">
-                          <i class="fas fa-list"></i> Danh sách phiếu xuất
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link" href="phieu_xuat.php">
-                          <i class="fas fa-plus-circle"></i> Tạo phiếu xuất
-                      </a>
-                  </li>
-              </ul>
-          </li>
-          
+        <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnKhachHang">
+                <i class="fas fa-users"></i> Quản lý khách hàng <!-- Đã sửa icon đúng -->
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuKhachHang">
+                <li class="nav-item"><a class="nav-link" href="khachhang.php"><i class="fas fa-user"></i> Khách hàng</a></li>
+                <li class="nav-item"><a class="nav-link" href="loaikhachhang.php"><i class="fas fa-users-cog"></i> Loại khách hàng</a></li>
+            </ul>
+        </li>
 
-            
-                    <li class="nav-item">
-                        <a class="nav-link" href="tonkho.php">
-                            <i class="fas fa-warehouse"></i> Báo cáo tồn kho
-                        </a>
-                    </li>
-                  
-                
-            
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </li>
+    </ul>
+</nav>
 
-            <li class="nav-item">
-                <a class="nav-link" href="khachhang.php"><i class="fas fa-users"></i> Khách hàng</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-            </li>
-        </ul>
-    </nav>
+<div class="main-content">
 
-    <div class="main-content">
-            
-            <div class="header-table">
-                <h2 style="font-size: 20px;">Sản Phẩm</h2>
-       <form method="POST" enctype="multipart/form-data" class="nhom-nut">
-        <input type="file" name="txtTenfile" accept=".xls,.xlsx" required>
+    <!-- HEADER -->
+    <div class="header-danh-sach">
+        <h2 class="tieu-de-chinh">Danh sách sản phẩm</h2>
+    </div>
 
-        <button type="submit" name="btnUpload" class="nut nut-xuat">
-            Nhập Excel
-        </button>
+    <!-- TÌM KIẾM + NÚT -->
+    <form method="GET">
+        <div class="chia2cot">
+            <input type="text" name="tkma" value="<?= htmlspecialchars($ma) ?>"
+                   class="input-tim-kiem" placeholder="Tìm theo mã sản phẩm">
 
-  
-            <a href="Sanpham.php?export=1&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>" 
-        class="nut nut-xuat">
-        Xuất Excel
+            <input type="text" name="tkten" value="<?= htmlspecialchars($ten) ?>"
+                   class="input-tim-kiem" placeholder="Tìm theo tên sản phẩm">
+
+            <div class="nhom-nut">
+                <button class="btn btn-primary" name="timkiem">
+                    <i class="fas fa-search"></i> Tìm
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- NHÓM NÚT CHỨC NĂNG -->
+    <div class="d-flex gap-2 mb-3">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="txtTenfile" accept=".xls,.xlsx" required>
+            <button type="submit" name="btnUpload" class="btn btn-secondary">
+                <i class="fas fa-file-import"></i> Nhập Excel
+            </button>
+        </form>
+
+        <a href="Sanpham.php?export=1&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>"
+           class="btn btn-secondary">
+            <i class="fas fa-file-export"></i> Xuất Excel
         </a>
 
+        <a href="taosanpham.php" class="btn btn-success">
+            <i class="fas fa-plus"></i> Thêm sản phẩm
+        </a>
+    </div>
 
-                <a href="taosanpham.php" class="nut nut-tao">
-                    Tạo sản phẩm
-                </a>
-            </form>
-
-            </div>
-
-            <form method="GET">
-                <i class="fas fa-search" style="color: #2f28b4ff;"></i>
-
-                <input type="text" name="tkma" placeholder="Tìm kiếm mã sản phẩm..." value="<?= htmlspecialchars($ma) ?>">
-                <i class="fas fa-search" style="color: #ad0f0fff;"></i>
-                <input type="text" name="tkten" placeholder="Tìm kiếm tên sản phẩm..." value="<?= htmlspecialchars($ten) ?>">
-                <button type="submit" name="timkiem">Tìm kiếm</button>
-            </form>
-            
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mã SP</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Danh mục</th>
-                      
-                        <th>Đơn vị tính</th>
-                        <th>Giá bán</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while($row = mysqli_fetch_assoc($list)): ?>
-                    <tr>
-                        <td style="font-weight: bold; color: #1967d2;"><?= $row['Masp'] ?></td>
-                        <td><?= $row['Tensp'] ?></td>
-                        <td><span class="chip"><?= $row['Tendm'] ?></span></td>
-                        <td><?= $row['Dvt'] ?></td>
-                        <td style="font-weight: bold;"><?= number_format($row['Giaban']) ?></td>
-                        
-                      
-                       
-
-                        <td>
-                            <a href="suasp.php?Masp=<?= $row['Masp'] ?>" class="nut-hanh-dong"><i class="fas fa-edit"></i></a>
-                          
-                        <a class="nut-hanh-dong"
+    <!-- BẢNG -->
+    <div class="khung-bang-bao-quanh">
+        <table class="bang-san-pham">
+            <thead>
+                <tr>
+                    <th>Mã SP</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Đơn vị</th>
+                    <th>Giá bán</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php while($row = mysqli_fetch_assoc($list)): ?>
+                <tr>
+                    <td><?= $row['Masp'] ?></td>
+                    <td><?= $row['Tensp'] ?></td>
+                    <td><span class="chip"><?= $row['Tendm'] ?></span></td>
+                    <td><?= $row['Dvt'] ?></td>
+                    <td><?= number_format($row['Giaban']) ?></td>
+                    <td>
+                        <a class="nut-hanh-dong nut-sua"
+                           href="suasp.php?Masp=<?= $row['Masp'] ?>">
+                           <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="nut-hanh-dong nut-xoa"
                            onclick="return confirm('Bạn có chắc muốn xóa?');"
                            href="xoasp.php?Masp=<?= $row['Masp'] ?>">
-                            <i class="fas fa-trash"></i>
+                           <i class="fas fa-trash"></i>
                         </a>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
 
            <div class="pagination-fixed">
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-            <a class="<?= ($i == $page) ? 'active' : '' ?>"
-               href="?page=<?= $i ?>&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>">
-                <?= $i ?>
-            </a>
-        <?php endfor; ?>
-    </div>
-</div>
+                <div class="pagination">
+                    <?php for ($i = 1; $i <= $totalPage; $i++): ?>
+                        <a class="<?= ($i == $page) ? 'active' : '' ?>"
+                        href="?page=<?= $i ?>&tkma=<?= urlencode($ma) ?>&tkten=<?= urlencode($ten) ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+            </div>
 
 
 
         
     </div>
 <script>
-document.getElementById("btnSanPham").addEventListener("click", function () {
-    const menu = document.getElementById("submenuSanPham");
-    menu.classList.toggle("d-none");
-    
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ===== TOGGLE MENU KHI CLICK =====
+    document.getElementById("btnSanPham")?.addEventListener("click", function () {
+        document.getElementById("submenuSanPham")?.classList.toggle("d-none");
+    });
+
+    document.getElementById("btnPhieuNhap")?.addEventListener("click", function () {
+        document.getElementById("submenuPhieuNhap")?.classList.toggle("d-none");
+    });
+
+    document.getElementById("btnPhieuXuat")?.addEventListener("click", function () {
+        document.getElementById("submenuPhieuXuat")?.classList.toggle("d-none");
+    });
+
+    document.getElementById("btnBaoCao")?.addEventListener("click", function () {
+        document.getElementById("submenuBaoCao")?.classList.toggle("d-none");
+    });
+
+    document.getElementById("btnKhachHang")?.addEventListener("click", function () {
+        document.getElementById("submenuKhachHang")?.classList.toggle("d-none");
+    });
+
+    // ===== TỰ ĐỘNG MỞ MENU QUẢN LÝ SẢN PHẨM KHI Ở TRANG CON =====
+    const path = window.location.pathname;
+
+    const sanPhamPages = [
+        "Sanpham.php",
+        "dmsp.php",
+        "Nhacungcap.php",
+        "taosanpham.php",
+        "taodmsp.php",
+        "suasp.php",
+        "suadmsp.php",
+        "taoncc.php",
+        "suancc.php"
+    ];
+
+    sanPhamPages.forEach(page => {
+        if (path.includes(page)) {
+            document.getElementById("submenuSanPham")?.classList.remove("d-none");
+        }
+    });
+
 });
-document.getElementById("btnBaoCao").addEventListener("click", function () {
-    document.getElementById("submenuBaoCao").classList.toggle("d-none");
-});     
-const btnPhieuNhap = document.getElementById("btnPhieuNhap");
-const submenuPhieuNhap = document.getElementById("submenuPhieuNhap");
-
-if (btnPhieuNhap) {
-    btnPhieuNhap.addEventListener("click", function () {
-        submenuPhieuNhap.classList.toggle("d-none");
-    });
-}
-const btnPhieuXuat = document.getElementById("btnPhieuXuat");
-const submenuPhieuXuat = document.getElementById("submenuPhieuXuat");
-
-if (btnPhieuXuat) {
-    btnPhieuXuat.addEventListener("click", function () {
-        submenuPhieuXuat.classList.toggle("d-none");
-    });
-}
 </script>
+
 
 </body>
 </html>
