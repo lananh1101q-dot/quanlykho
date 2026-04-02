@@ -260,7 +260,7 @@ body{
         
 </head>
 <body>
-<nav class="sidebar">
+ <nav class="sidebar">
     <div class="text-center mb-4">
         <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
     </div>
@@ -268,6 +268,18 @@ body{
         <li class="nav-item">
             <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
         </li>
+       
+         <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                <li class="nav-item"><a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-chart-line"></i> Báo cáo tiêu hao</a></li>
+                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-chart-pie"></i> Báo cáo tồn kho</a></li>
+            </ul>
+        </li>
+       
 
         <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
@@ -304,23 +316,12 @@ body{
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+            <a class="nav-link" href="javascript:void(0)" id="btnCongTrinh">
+                <i class="fas fa-briefcase"></i> Quản lý công trình
                 <i class="fas fa-chevron-down float-end"></i>
             </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao"> <!-- ĐÃ SỬA: thêm ul đúng id -->
-                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-warehouse"></i> Báo cáo tồn kho</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnKhachHang">
-                <i class="fas fa-users"></i> Quản lý khách hàng <!-- Đã sửa icon đúng -->
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuKhachHang">
-                <li class="nav-item"><a class="nav-link" href="khachhang.php"><i class="fas fa-user"></i> Khách hàng</a></li>
-                <li class="nav-item"><a class="nav-link" href="loaikhachhang.php"><i class="fas fa-users-cog"></i> Loại khách hàng</a></li>
+            <ul class="nav flex-column ms-3 d-none" id="submenuCongTrinh">
+                <li class="nav-item"><a class="nav-link" href="congtrinh.php"><i class="fas fa-folder-open"></i> Công trình</a></li>
             </ul>
         </li>
 

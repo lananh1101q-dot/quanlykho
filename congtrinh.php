@@ -227,26 +227,39 @@ $page_title = "Công Trình - Quản Lý Kho Hàng";
     </div>
 </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById("btnSanPham").addEventListener("click", function () {
-        document.getElementById("submenuSanPham").classList.toggle("d-none");
-    });
+    // Quản lý sidebar toggle submenu - Tối ưu và dễ bảo trì
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuItems = [
+            { btn: "btnBaoCao", submenu: "submenuBaoCao" },
+            { btn: "btnSanPham", submenu: "submenuSanPham" },
+            { btn: "btnPhieuNhap", submenu: "submenuPhieuNhap" },
+            { btn: "btnPhieuXuat", submenu: "submenuPhieuXuat" },
+            { btn: "btnCongTrinh", submenu: "submenuCongTrinh" }
+        ];
 
-    document.getElementById("btnPhieuNhap").addEventListener("click", function () {
-        document.getElementById("submenuPhieuNhap").classList.toggle("d-none");
-    });
-
-    document.getElementById("btnPhieuXuat").addEventListener("click", function () {
-        document.getElementById("submenuPhieuXuat").classList.toggle("d-none");
-    });
-
-    document.getElementById("btnBaoCao").addEventListener("click", function () {
-        document.getElementById("submenuBaoCao").classList.toggle("d-none");
-    });
-
-    document.getElementById("btnCongtrinh").addEventListener("click", function () {
-        document.getElementById("submenuCongtrinh").classList.toggle("d-none");
+        menuItems.forEach(item => {
+            const button = document.getElementById(item.btn);
+            if (button) {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const submenu = document.getElementById(item.submenu);
+                    if (submenu) {
+                        submenu.classList.toggle("d-none");
+                        
+                        // Xoay icon chevron
+                        const icon = this.querySelector(".fa-chevron-down");
+                        if (icon) {
+                            icon.style.transform = submenu.classList.contains("d-none") 
+                                ? "rotate(0deg)" 
+                                : "rotate(180deg)";
+                            icon.style.transition = "transform 0.3s ease";
+                        }
+                    }
+                });
+            }
+        });
     });
 </script>
 </body>

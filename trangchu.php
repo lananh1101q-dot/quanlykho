@@ -116,9 +116,18 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
         <li class="nav-item">
             <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
         </li>
-                <li class="nav-item">
-            <a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-home"></i> Trang Chủ</a>
+       
+         <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                <li class="nav-item"><a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-chart-line"></i> Báo cáo tiêu hao</a></li>
+                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-chart-pie"></i> Báo cáo tồn kho</a></li>
+            </ul>
         </li>
+       
 
         <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
@@ -155,23 +164,12 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+            <a class="nav-link" href="javascript:void(0)" id="btnCongTrinh">
+                <i class="fas fa-briefcase"></i> Quản lý công trình
                 <i class="fas fa-chevron-down float-end"></i>
             </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao"> <!-- ĐÃ SỬA: thêm ul đúng id -->
-                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-warehouse"></i> Báo cáo tồn kho</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnKhachHang">
-                <i class="fas fa-users"></i> Quản lý khách hàng <!-- Đã sửa icon đúng -->
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuKhachHang">
-                <li class="nav-item"><a class="nav-link" href="congtrinh.php"><i class="fas fa-user"></i> Khách hàng</a></li>
-                <li class="nav-item"><a class="nav-link" href="loaikhachhang.php"><i class="fas fa-users-cog"></i> Loại khách hàng</a></li>
+            <ul class="nav flex-column ms-3 d-none" id="submenuCongTrinh">
+                <li class="nav-item"><a class="nav-link" href="congtrinh.php"><i class="fas fa-folder-open"></i> Công trình</a></li>
             </ul>
         </li>
 
@@ -183,7 +181,7 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
 
 
  <main class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex justify-content- align-items-center mb-5">
         <h2>Trang Chủ</h2>
         <div class="user-info">
        
@@ -206,33 +204,41 @@ $page_title = "Trang Chủ - Quản Lý Kho Hàng";
     </div>
 </main>
 
-    
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Quản lý sản phẩm
-    document.getElementById("btnSanPham").addEventListener("click", function () {
-        document.getElementById("submenuSanPham").classList.toggle("d-none");
-    });
+    // Quản lý sidebar toggle submenu - Tối ưu và dễ bảo trì
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuItems = [
+            { btn: "btnBaoCao", submenu: "submenuBaoCao" },
+            { btn: "btnSanPham", submenu: "submenuSanPham" },
+            { btn: "btnPhieuNhap", submenu: "submenuPhieuNhap" },
+            { btn: "btnPhieuXuat", submenu: "submenuPhieuXuat" },
+            { btn: "btnCongTrinh", submenu: "submenuCongTrinh" }
+        ];
 
-    // Phiếu nhập kho
-    document.getElementById("btnPhieuNhap").addEventListener("click", function () {
-        document.getElementById("submenuPhieuNhap").classList.toggle("d-none");
-    });
-
-    // Phiếu xuất
-    document.getElementById("btnPhieuXuat").addEventListener("click", function () {
-        document.getElementById("submenuPhieuXuat").classList.toggle("d-none");
-    });
-
-    // Báo cáo & Thống kê (giờ hoạt động)
-    document.getElementById("btnBaoCao").addEventListener("click", function () {
-        document.getElementById("submenuBaoCao").classList.toggle("d-none");
-    });
-
-    // QUẢN LÝ KHÁCH HÀNG (đã thêm đầy đủ toggle)
-    document.getElementById("btnKhachHang").addEventListener("click", function () {
-        document.getElementById("submenuKhachHang").classList.toggle("d-none");
+        menuItems.forEach(item => {
+            const button = document.getElementById(item.btn);
+            if (button) {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const submenu = document.getElementById(item.submenu);
+                    if (submenu) {
+                        submenu.classList.toggle("d-none");
+                        
+                        // Xoay icon chevron
+                        const icon = this.querySelector(".fa-chevron-down");
+                        if (icon) {
+                            icon.style.transform = submenu.classList.contains("d-none") 
+                                ? "rotate(0deg)" 
+                                : "rotate(180deg)";
+                            icon.style.transition = "transform 0.3s ease";
+                        }
+                    }
+                });
+            }
+        });
     });
 </script>
+    
 </body>
 </html>

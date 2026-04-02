@@ -1,94 +1,82 @@
 <?php
 session_start();
-if (!isset($_SESSION['user'])) {
-    header('Location: dangnhap.php');
-    exit;
-}
 require_once __DIR__ . '/db.php';
 
-$sql = "SELECT tk.Makho, k.Tenkho, tk.Masp, sp.Tensp, sp.Dvt, tk.Soluongton
-        FROM Tonkho tk
-        JOIN Kho k ON tk.Makho = k.Makho
-        JOIN Sanpham sp ON tk.Masp = sp.Masp
-        ORDER BY k.Tenkho, sp.Tensp";
-$rows = $pdo->query($sql)->fetchAll();
+// 1. Kiểm tra đăng nhập
+if (!isset($_SESSION['user'])) {
+    header("Location: dangnhap.php");
+    exit;
+}
+
+$user = $_SESSION['user'];
+$error = '';
+$success = '';
+
+// 2. Lấy thông tin công trình cũ để hiển thị lên Form
+if (isset($_GET['id'])) {
+    $mact_old = $_GET['id'];
+    $stmt = $pdo->prepare("SELECT * FROM congtrinh WHERE Mact = ?");
+    $stmt->execute([$mact_old]);
+    $congtrinh = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$congtrinh) {
+        die("Công trình không tồn tại!");
+    }
+} else {
+    header("Location: congtrinh.php");
+    exit;
+}
+
+// 3. Xử lý khi nhấn nút "Thay đổi"
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tenct = trim($_POST['tenct'] ?? '');
+    $diachi = trim($_POST['diachi'] ?? '');
+
+    if (empty($tenct)) {
+        $error = "Tên công trình không được để trống!";
+    } else {
+        try {
+            $sql = "UPDATE congtrinh SET Tenct = ?, Diachict = ? WHERE Mact = ?";
+            $stmt = $pdo->prepare($sql);
+            if ($stmt->execute([$tenct, $diachi, $mact_old])) {
+                echo "<script>alert('Cập nhật thành công!'); window.location.href='congtrinh.php';</script>";
+                exit;
+            }
+        } catch (PDOException $e) {
+            $error = "Lỗi: " . $e->getMessage();
+        }
+    }
+}
+
+$page_title = "Sửa Công Trình - Quản Lý Kho";
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Báo cáo tồn kho</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-       <style>
-        body { 
-            background-color: #f8f9fa; 
-            font-family: 'Segoe UI', sans-serif; 
-        }
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { background-color: #007bff; height: 100vh; position: fixed; width: 250px; color: white; padding-top: 20px; top: 0; left: 0; }
+        .sidebar .nav-link { color: white !important; padding: 12px 20px; border-radius: 5px; margin: 4px 10px; transition: 0.3s; }
+        .sidebar .nav-link:hover { background-color: #0069d9; transform: translateX(8px); }
+        .main-content { margin-left: 250px; padding: 40px; }
         
-        /* Sidebar */
-        .sidebar { 
-            background-color: #007bff; 
-            height: 100vh; 
-            position: fixed; 
-            width: 250px; 
-            color: white; 
-            padding-top: 20px; 
-            top: 0;
-            left: 0;
-            overflow-y: auto;
-        }
-        
-        .sidebar .nav-link {
-            color: white !important;
-            padding: 12px 20px;
-            border-radius: 5px;
-            margin: 4px 10px;
-            transition: all 0.3s ease;
-            font-weight: normal; /* Chữ bình thường mặc định */
-        }
-        
-        /* CHỈ hover mới in đậm và nổi bật */
-        .sidebar .nav-link:hover {
-            background-color: #0069d9;    /* Nền xanh đậm hơn một chút */
-            font-weight: bold;            /* Chữ in đậm */
-            transform: translateX(8px);   /* Dịch nhẹ sang phải cho đẹp */
-        }
-        
-        /* Bỏ hoàn toàn style active - tất cả đều giống nhau */
-        .sidebar .nav-link.active {
-            background-color: transparent;
-            font-weight: normal;
-            transform: none;
-        }
-        
-        .main-content { 
-            margin-left: 250px; 
-            padding: 20px; 
-        }
-        @media (max-width: 768px) { 
-            .sidebar { 
-                width: 100%; 
-                height: auto; 
-                position: relative; 
-            } 
-            .main-content { 
-                margin-left: 0; 
-            } 
-        }
-         /* tránh ghi đè */
-        .d-none {
-            display: none !important;
-        }
-        #submenuSanPham {
-            transition: all 0.3s ease;
-        }
+        /* Style giống ảnh bạn gửi */
+        .form-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .form-label { font-weight: bold; margin-top: 15px; }
+        .form-control { border-radius: 4px; padding: 12px; border: 1px solid #ddd; }
+        .btn-update { background-color: #ff4d4d; color: white; border: none; padding: 10px 25px; border-radius: 5px; font-weight: bold; }
+        .btn-update:hover { background-color: #e60000; }
+        .btn-cancel { background-color: #ff4d4d; color: white; border: none; padding: 10px 25px; border-radius: 5px; font-weight: bold; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body>
-    <nav class="sidebar">
+
+ <nav class="sidebar">
     <div class="text-center mb-4">
         <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
     </div>
@@ -159,49 +147,41 @@ $rows = $pdo->query($sql)->fetchAll();
     </ul>
 </nav>
 
-    <div class="main-content">
-  <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold">Báo cáo tồn kho</h1>
-        <p class="text-slate-400 text-sm mt-1">Danh sách tồn kho theo kho và sản phẩm</p>
-      </div>
-      <div class="flex gap-2 text-sm">
-        <a href="dashboard.php" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700">← Dashboard</a>
-        <a href="logout.php" class="px-3 py-2 rounded bg-red-600 hover:bg-red-700">Đăng xuất</a>
-      </div>
-    </div>
+<main class="main-content">
+    <h2 class="mb-4 text-uppercase fw-bold" style="color: #334155;">Sửa Thông Tin Công Trình</h2>
 
-    <div class="flex items-center justify-between">
-      <table class="min-w-full text-sm">
-        <thead class="bg-slate-900 text-slate-300">
-          <tr>
-            <th class="px-4 py-3 text-left">Kho</th>
-            <th class="px-4 py-3 text-left">Mã SP</th>
-            <th class="px-4 py-3 text-left">Tên sản phẩm</th>
-            <th class="px-4 py-3 text-left">ĐVT</th>
-            <th class="px-4 py-3 text-right">Số lượng tồn</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (empty($rows)): ?>
-            <tr><td colspan="5" class="px-4 py-4 text-center text-slate-400">Chưa có dữ liệu tồn kho.</td></tr>
-          <?php else: ?>
-            <?php foreach ($rows as $r): ?>
-              <tr class="border-t border-slate-800">
-                <td class="px-4 py-2">[<?= htmlspecialchars($r['Makho']) ?>] <?= htmlspecialchars($r['Tenkho']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Masp']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Tensp']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($r['Dvt']) ?></td>
-                <td class="px-4 py-2 text-right font-semibold"><?= number_format($r['Soluongton']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+    <?php if ($error): ?>
+        <div class="alert alert-danger"><?= $error ?></div>
+    <?php endif; ?>
+
+    <div class="form-container">
+        <form action="" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Mã số:</label>
+                <input type="text" class="form-control bg-light" value="<?= htmlspecialchars($congtrinh['Mact']) ?>" readonly>
+                <small class="text-muted">(Mã số không được phép thay đổi)</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tên công trình:</label>
+                <input type="text" name="tenct" class="form-control" 
+                       value="<?= htmlspecialchars($congtrinh['Tenct']) ?>" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Địa chỉ:</label>
+                <input type="text" name="diachi" class="form-control" 
+                       value="<?= htmlspecialchars($congtrinh['Diachict'] ?? '') ?>">
+            </div>
+
+            <div class="mt-4">
+                <a href="congtrinh.php" class="btn btn-cancel me-2">hủy</a>
+                <button type="submit" class="btn btn-update">thay đổi</button>
+            </div>
+        </form>
     </div>
-  </div>
-  </div>
+</main>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Quản lý sidebar toggle submenu - Tối ưu và dễ bảo trì
