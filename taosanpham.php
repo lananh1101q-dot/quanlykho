@@ -144,12 +144,12 @@ if (isset($_POST['btnluu'])) {
 
         <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
-                <i class="fas fa-box"></i> Quản lý sản phẩm
+                <i class="fas fa-box"></i> Quản lý Vật liệu
                 <i class="fas fa-chevron-down float-end"></i>
             </a>
             <ul class="nav flex-column ms-3 d-none" id="submenuSanPham">
-                <li class="nav-item"><a class="nav-link" href="Sanpham.php"><i class="fas fa-cube"></i> Sản phẩm</a></li>
-                <li class="nav-item"><a class="nav-link" href="dmsp.php"><i class="fas fa-tags"></i> Danh mục sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="Sanpham.php"><i class="fas fa-cube"></i> Vật liệu</a></li>
+                <li class="nav-item"><a class="nav-link" href="dmsp.php"><i class="fas fa-tags"></i> Danh mục Vật liệu</a></li>
                 <li class="nav-item"><a class="nav-link" href="Nhacungcap.php"><i class="fas fa-truck"></i> Nhà cung cấp</a></li>
             </ul>
         </li>
@@ -205,7 +205,7 @@ if (isset($_POST['btnluu'])) {
 
     <div class="main-content">
     <div class="khung-tieu-de-chinh">
-        <h1 class="tieu-de-lon">Tạo Sản Phẩm Mới</h1>
+        <h1 class="tieu-de-lon">Tạo Vật liệu Mới</h1>
 
         <div class="noi-dung-chinh-form">
 
@@ -217,12 +217,12 @@ if (isset($_POST['btnluu'])) {
 
                     <div class="nhom-truong hai-cot">
                         <div class="truong-nhap">
-                            <label>Mã sản phẩm *</label>
+                            <label>Mã Vật liệu *</label>
                             <input type="text" name="Masp">
                         </div>
 
                         <div class="truong-nhap">
-                            <label>Tên sản phẩm *</label>
+                            <label>Tên Vật liệu *</label>
                             <input type="text" name="Tensp">
                         </div>
                     </div>
@@ -249,7 +249,7 @@ if (isset($_POST['btnluu'])) {
 
                 <!-- GIÁ -->
                 <div class="khung-nhap-lieu">
-                    <h3>Giá sản phẩm</h3>
+                    <h3>Giá Vật liệu</h3>
                     <div class="truong-nhap">
                         <label>Giá bán *</label>
                         <input type="text" name="Giaban" value="0">
@@ -263,7 +263,7 @@ if (isset($_POST['btnluu'])) {
                     </a>
 
                     <button type="submit" name="btnluu" class="nut nut-them-moi">
-                        <i class="fas fa-save"></i> Lưu Sản Phẩm
+                        <i class="fas fa-save"></i> Lưu Vật liệu
                     </button>
                 </div>
 

@@ -651,8 +651,8 @@ table td {
         <table class="bang-san-pham">
             <thead>
                 <tr>
-                    <th>Mã SP</th>
-                    <th>Tên sản phẩm</th>
+                    <th>Mã Vật liệu</th>
+                    <th>Tên Vật liệu</th>
                     <th>Danh mục</th>
                     <th>Đơn vị</th>
                     <th>Giá bán</th>
