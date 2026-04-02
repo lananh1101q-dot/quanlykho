@@ -1,13 +1,12 @@
+DROP DATABASE IF EXISTS QuanLyKho;
 CREATE DATABASE QuanLyKho;
 USE QuanLyKho;
-
 
 CREATE TABLE Danhmucsp (
     Madm INT PRIMARY KEY AUTO_INCREMENT,
     Tendm VARCHAR(100) NOT NULL UNIQUE,
     Mota VARCHAR(100)
 );
-
 
 CREATE TABLE Sanpham (
     Masp VARCHAR(50) PRIMARY KEY,
@@ -17,7 +16,6 @@ CREATE TABLE Sanpham (
     Giaban DECIMAL(18, 2) DEFAULT 0,
     FOREIGN KEY (Madm) REFERENCES Danhmucsp(Madm)
 );
-
 
 CREATE TABLE Nhacungcap (
     Mancc VARCHAR(50) PRIMARY KEY,
@@ -32,16 +30,19 @@ CREATE TABLE Loaikhachhang (
     Motaloaikh TEXT
 );
 
-
-CREATE TABLE Khachhang (
-    Makh VARCHAR(50) PRIMARY KEY,
-    Tenkh VARCHAR(255) NOT NULL,
-    Sdtkh VARCHAR(15),
-    Diachikh VARCHAR(255),
+CREATE TABLE Congtrinh (
+    Mact VARCHAR(50) PRIMARY KEY,
+    Tenct VARCHAR(255) NOT NULL,
+    Diachict VARCHAR(255),
     Maloaikh INT,
     FOREIGN KEY (Maloaikh) REFERENCES Loaikhachhang(Maloaikh)
 );
 
+CREATE TABLE Kho (
+    Makho VARCHAR(50) PRIMARY KEY,
+    Tenkho VARCHAR(100) NOT NULL,
+    Diachi TEXT
+);
 
 CREATE TABLE Phieunhap (
     Manhaphang VARCHAR(50) PRIMARY KEY,
@@ -54,28 +55,25 @@ CREATE TABLE Phieunhap (
     FOREIGN KEY (Makho) REFERENCES Kho(Makho)
 );
 
-
 CREATE TABLE Chitiet_Phieunhap (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Manhaphang VARCHAR(50),
     Masp VARCHAR(50),
     Soluong INT NOT NULL,
     Dongianhap DECIMAL(18, 2) NOT NULL,
-    Thanhtien DECIMAL(18, 2) AS (Soluong * Dongianhap) STORED, -- Trường tính toán
+    Thanhtien DECIMAL(18, 2) AS (Soluong * Dongianhap) STORED,
     FOREIGN KEY (Manhaphang) REFERENCES Phieunhap(Manhaphang),
     FOREIGN KEY (Masp) REFERENCES Sanpham(Masp)
 );
 
-
 CREATE TABLE Phieuxuat (
     Maxuathang VARCHAR(50) PRIMARY KEY,
-    Makh VARCHAR(50),
+    Mact VARCHAR(50),
     Ngayxuat DATE NOT NULL,
     Tongtienxuat DECIMAL(18, 2) DEFAULT 0,
     Ghichu TEXT,
-    FOREIGN KEY (Makh) REFERENCES Khachhang(Makh)
+    FOREIGN KEY (Mact) REFERENCES Congtrinh(Mact)
 );
-
 
 CREATE TABLE Chitiet_Phieuxuat (
     Id INT PRIMARY KEY AUTO_INCREMENT,
@@ -88,29 +86,24 @@ CREATE TABLE Chitiet_Phieuxuat (
     FOREIGN KEY (Masp) REFERENCES Sanpham(Masp)
 );
 
-CREATE TABLE Kho (
-    Makho VARCHAR(50) PRIMARY KEY,
-    Tenkho VARCHAR(100) NOT NULL,
-    Diachi TEXT
-);
-
-
 CREATE TABLE Tonkho (
     Makho VARCHAR(50),
     Masp VARCHAR(50),
     Soluongton INT DEFAULT 0,
-    PRIMARY KEY (Makho, Masp), 
+    PRIMARY KEY (Makho, Masp),
     FOREIGN KEY (Makho) REFERENCES Kho(Makho),
     FOREIGN KEY (Masp) REFERENCES Sanpham(Masp)
 );
+
 CREATE TABLE Nguoidung (
     Manv VARCHAR(50) PRIMARY KEY,
     Tendangnhap VARCHAR(100) NOT NULL UNIQUE,
-    Matkhau VARCHAR(255) NOT NULL, 
+    Matkhau VARCHAR(255) NOT NULL,
     Hovaten VARCHAR(255),
     Email VARCHAR(100),
     Vaitro VARCHAR(50) NOT NULL
 );
+
 CREATE TABLE Thanhtoan (
     Matt INT AUTO_INCREMENT PRIMARY KEY,
     Maxuathang VARCHAR(50),
@@ -119,4 +112,19 @@ CREATE TABLE Thanhtoan (
     Hinhthuc VARCHAR(50),
     Ghichu TEXT,
     FOREIGN KEY (Maxuathang) REFERENCES Phieuxuat(Maxuathang)
+);
+
+CREATE TABLE Baocaotieuhao (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Mact VARCHAR(50) NOT NULL,
+    Masp VARCHAR(50) NOT NULL,
+    Makho VARCHAR(50) NOT NULL,
+    Ngaybaocao DATE NOT NULL,
+    Soluongkehoach DECIMAL(18,2) DEFAULT 0,
+    Soluongthuc DECIMAL(18,2) DEFAULT 0,
+    Soluongkhongdung DECIMAL(18,2) DEFAULT 0,
+    Ghichu TEXT,
+    FOREIGN KEY (Mact) REFERENCES Congtrinh(Mact),
+    FOREIGN KEY (Masp) REFERENCES Sanpham(Masp),
+    FOREIGN KEY (Makho) REFERENCES Kho(Makho)
 );
