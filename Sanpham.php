@@ -275,115 +275,261 @@ if (!$list) {
         
         
          /* 4. DESIGN BẢNG GIỐNG MẪU BẠN GỬI */
-        .header-table { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .nhom-nut { display: flex; gap: 10px; }
-        .nut { padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
-        .nut-tao { background: #27ae60; color: white; }
-        .nut-xuat { background: #eee; color: #333; }
+       /* =========================
+   HEADER + NHÓM NÚT
+   ========================= */
 
-        .thanh-tim-kiem { display: flex;gap: 20px;background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 15px; align-items: center; border: 1px solid #ddd; }
-        .thanh-tim-kiem input { border: none; background: transparent; outline: none; padding-left: 10px; width: 100%; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        table thead { background: #f8f9fa; border-bottom: 2px solid #dee2e6; }
-        table th { padding: 12px; text-align: left; color: #495057; }
-        table td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        
-        .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; background: #e8f0fe; color: #1967d2; }
-        .nut-hanh-dong { color: #888; margin: 0 5px; cursor: pointer; text-decoration: none; }
-        .nut-hanh-dong:hover { color: #ff4d4d; }
-        
-        .pagination-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 250px; /* đúng bằng width sidebar */
-            right: 0;
-            background: #fff;
-            padding: 10px 20px;
-            border-top: 1px solid #ddd;
-            z-index: 999;
-        }
-
-        .pagination{
-    justify-content:center;
+/* Khung header phía trên bảng */
+.header-table {
+    display: flex;                 /* Dùng flexbox để sắp xếp con theo hàng ngang */
+    justify-content: space-between;/* Đẩy 2 bên: tiêu đề bên trái – nút bên phải */
+    align-items: center;           /* Canh giữa theo chiều dọc */
+    margin-bottom: 20px;           /* Tạo khoảng cách với phần bên dưới */
 }
 
-        .pagination a {
-            padding: 6px 12px;
-            border-radius: 4px;
-            background: #f1f1f1;
-            text-decoration: none;
-            color: #333;
-            font-size: 13px;
-        }
-
-        .pagination a.active {
-            background: #007bff;
-            color: #fff;
-        }
-
-        .pagination a:hover {
-            background: #0056b3;
-            color: #fff;
-        }
-
-        .header-danh-sach{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+/* Nhóm các nút nằm cạnh nhau */
+.nhom-nut {
+    display: flex;                 /* Các nút nằm trên 1 hàng */
+    gap: 10px;                     /* Khoảng cách giữa các nút */
 }
 
-.tieu-de-chinh{
-    font-weight:700;
-    color:#333;
+/* Style chung cho các nút tự tạo */
+.nut {
+    padding: 8px 15px;             /* Đệm trong: trên-dưới | trái-phải */
+    border-radius: 4px;            /* Bo tròn góc nút */
+    text-decoration: none;         /* Bỏ gạch chân thẻ <a> */
+    font-size: 13px;               /* Cỡ chữ */
+    font-weight: bold;             /* Chữ đậm */
+    border: none;                  /* Bỏ viền */
+    cursor: pointer;               /* Hover hiện bàn tay */
 }
 
-.chia2cot{
-    display:grid;
-    grid-template-columns:1fr 1fr auto;
-    gap:20px;
-    background:#fff;
-    padding:15px;
-    border-radius:8px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
-    margin-bottom:15px;
+/* Nút tạo mới */
+.nut-tao {
+    background: #27ae60;           /* Màu nền xanh lá */
+    color: white;                  /* Màu chữ trắng */
 }
 
-.input-tim-kiem{
-    padding:10px 12px;
-    border:1px solid #ddd;
-    border-radius:6px;
-    width:100%;
+/* Nút xuất */
+.nut-xuat {
+    background: #eee;              /* Nền xám nhạt */
+    color: #333;                   /* Màu chữ xám đậm */
 }
 
-.khung-bang-bao-quanh{
-    background:#fff;
-    border-radius:10px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.06);
-    overflow:hidden;
+/* =========================
+   THANH TÌM KIẾM
+   ========================= */
+
+/* Khung tìm kiếm */
+.thanh-tim-kiem {
+    display: flex;                 /* Sắp xếp input + nút theo hàng */
+    gap: 20px;                     /* Khoảng cách giữa các thành phần */
+    background: #f9f9f9;           /* Màu nền xám rất nhạt */
+    padding: 10px;                 /* Khoảng đệm trong */
+    border-radius: 4px;            /* Bo tròn góc */
+    margin-bottom: 15px;           /* Cách phần bảng bên dưới */
+    align-items: center;           /* Canh giữa theo chiều dọc */
+    border: 1px solid #ddd;        /* Viền xám nhạt */
 }
 
-.bang-san-pham{
-    width:100%;
-    border-collapse:collapse;
+/* Input bên trong thanh tìm kiếm */
+.thanh-tim-kiem input {
+    border: none;                  /* Bỏ viền mặc định */
+    background: transparent;       /* Nền trong suốt */
+    outline: none;                 /* Bỏ viền xanh khi focus */
+    padding-left: 10px;            /* Cách lề trái cho chữ */
+    width: 100%;                   /* Chiếm hết chiều ngang còn lại */
 }
 
-.bang-san-pham th{
-    background:#f1f3f5;
-    text-transform:uppercase;
-    font-size:13px;
+/* =========================
+   TABLE
+   ========================= */
+
+table {
+    width: 100%;                   /* Bảng rộng full khung */
+    border-collapse: collapse;     /* Gộp viền lại (không bị đôi) */
+    font-size: 14px;               /* Cỡ chữ trong bảng */
 }
 
+table thead {
+    background: #f8f9fa;           /* Nền header bảng */
+    border-bottom: 2px solid #dee2e6; /* Viền dưới header */
+}
+
+table th {
+    padding: 12px;                 /* Khoảng cách chữ với ô */
+    text-align: left;              /* Canh trái chữ */
+    color: #495057;                /* Màu chữ header */
+}
+
+table td {
+    padding: 12px;                 /* Khoảng cách trong ô */
+    border-bottom: 1px solid #eee; /* Đường kẻ giữa các dòng */
+    vertical-align: middle;        /* Canh giữa nội dung theo chiều dọc */
+}
+.canh-trai {
+    text-align: left;
+}
+.canh-giua {
+    text-align: center;
+}
+.canh-phai {
+    text-align: right;
+}
+
+/* =========================
+   CHIP – TRẠNG THÁI
+   ========================= */
+
+.chip {
+    padding: 4px 10px;             /* Đệm trong */
+    border-radius: 20px;           /* Bo tròn dạng viên thuốc */
+    font-size: 11px;               /* Cỡ chữ nhỏ */
+    font-weight: bold;             /* Chữ đậm */
+    background: #e8f0fe;           /* Nền xanh nhạt */
+    color: #1967d2;                /* Chữ xanh đậm */
+}
+
+/* =========================
+   NÚT HÀNH ĐỘNG (SỬA / XOÁ)
+   ========================= */
+
+.nut-hanh-dong {
+    color: #888;                   /* Màu icon mặc định */
+    margin: 0 5px;                 /* Khoảng cách giữa các icon */
+    cursor: pointer;               /* Hover hiện tay */
+    text-decoration: none;         /* Bỏ gạch chân */
+}
+
+.nut-hanh-dong:hover {
+    color: #ff4d4d;                /* Hover chuyển sang đỏ */
+}
+
+/* =========================
+   PHÂN TRANG CỐ ĐỊNH DƯỚI
+   ========================= */
+
+.pagination-fixed {
+    position: fixed;               /* Cố định ở màn hình */
+    bottom: 0;                     /* Dính sát đáy */
+    left: 250px;                   /* Chừa chỗ cho sidebar */
+    right: 0;                      /* Kéo rộng hết bên phải */
+    background: #fff;              /* Nền trắng */
+    padding: 10px 20px;            /* Đệm trong */
+    border-top: 1px solid #ddd;    /* Viền trên */
+    z-index: 999;                  /* Luôn nằm trên các phần khác */
+}
+
+/* Khung pagination */
+.pagination {
+    display: flex;                /* Dùng flexbox */
+    justify-content: center;       /* Canh giữa các nút trang */
+    gap: 8px;                      /* Khoảng cách giữa các nút */
+  /*  justify-content: flex-end;  👉 CANH PHẢI */ 
+/*justify-content: flex-start;  canh trái */
+
+}
+
+/* Nút số trang */
+.pagination a {
+    padding: 6px 12px;             /* Kích thước nút */
+    border-radius: 4px;            /* Bo góc */
+    background: #f1f1f1;           /* Nền xám */
+    text-decoration: none;         /* Bỏ gạch chân */
+    color: #333;                   /* Màu chữ */
+    font-size: 13px;               /* Cỡ chữ */
+}
+
+/* Trang đang chọn */
+.pagination a.active {
+    background: #007bff;           /* Nền xanh */
+    color: #fff;                   /* Chữ trắng */
+}
+
+/* Hover nút trang */
+.pagination a:hover {
+    background: #0056b3;           /* Xanh đậm hơn */
+    color: #fff;                   /* Chữ trắng */
+}
+
+/* =========================
+   HEADER DANH SÁCH
+   ========================= */
+
+.header-danh-sach {
+    display: flex;                 /* Sắp xếp ngang */
+    justify-content: space-between;/* Đẩy 2 bên */
+    align-items: center;           /* Canh giữa */
+    margin-bottom: 20px;           /* Cách phần dưới */
+}
+
+/* Tiêu đề chính */
+.tieu-de-chinh {
+    font-weight: 700;              /* Chữ rất đậm */
+    color: #333;                   /* Màu chữ */
+}
+.chu {
+    font-weight: 700;              /* Chữ rất đậm */
+    color: #d30b0b;                   /* Màu chữ */
+}
+
+/* =========================
+   FORM TÌM KIẾM 2 CỘT
+   ========================= */
+
+.chia2cot {
+    display: grid;                 /* Dùng grid layout */
+    grid-template-columns: 1fr 1fr auto; 
+                                   /* 2 ô input + 1 ô nút */
+    gap: 20px;                     /* Khoảng cách giữa các cột */
+    background: #fff;              /* Nền trắng */
+    padding: 15px;                 /* Đệm trong */
+    border-radius: 8px;            /* Bo góc */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+                                   /* Đổ bóng nhẹ */
+    margin-bottom: 15px;           /* Cách phần dưới */
+}
+
+/* Input tìm kiếm */
+.input-tim-kiem {
+    padding: 10px 12px;            /* Đệm trong */
+    border: 1px solid #ddd;        /* Viền xám */
+    border-radius: 6px;            /* Bo góc */
+    width: 100%;                   /* Full chiều ngang */
+}
+
+/* =========================
+   KHUNG BẢNG
+   ========================= */
+
+.khung-bang-bao-quanh {
+    background: #fff;              /* Nền trắng */
+    border-radius: 10px;           /* Bo góc */
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
+                                   /* Đổ bóng */
+    overflow: hidden;              /* Không cho tràn góc */
+}
+
+/* Bảng sản phẩm */
+.bang-san-pham {
+    width: 100%;                   /* Full chiều ngang */
+    border-collapse: collapse;     /* Gộp viền */
+}
+
+/* Header bảng */
+.bang-san-pham th {
+    background: #f1f3f5;           /* Nền header */
+    text-transform: uppercase;     /* Viết hoa chữ */
+    font-size: 13px;               /* Cỡ chữ nhỏ */
+}
+
+/* Ô bảng */
 .bang-san-pham td,
-.bang-san-pham th{
-    padding:14px;
-    border-bottom:1px solid #eee;
+.bang-san-pham th {
+    padding: 14px;                 /* Đệm trong */
+    border-bottom: 1px solid #eee; /* Đường kẻ dưới */
 }
 
-
-
-       
     </style>
 </head>
 <body>
@@ -461,17 +607,17 @@ if (!$list) {
 
     <!-- HEADER -->
     <div class="header-danh-sach">
-        <h2 class="tieu-de-chinh">Danh sách sản phẩm</h2>
+        <h2 class="tieu-de-chinh">Danh sách vật tư</h2>
     </div>
 
     <!-- TÌM KIẾM + NÚT -->
     <form method="GET">
         <div class="chia2cot">
             <input type="text" name="tkma" value="<?= htmlspecialchars($ma) ?>"
-                   class="input-tim-kiem" placeholder="Tìm theo mã sản phẩm">
+                   class="input-tim-kiem" placeholder="Tìm theo mã vật tư">
 
             <input type="text" name="tkten" value="<?= htmlspecialchars($ten) ?>"
-                   class="input-tim-kiem" placeholder="Tìm theo tên sản phẩm">
+                   class="input-tim-kiem" placeholder="Tìm theo tên vật tư">
 
             <div class="nhom-nut">
                 <button class="btn btn-primary" name="timkiem">
@@ -496,7 +642,7 @@ if (!$list) {
         </a>
 
         <a href="taosanpham.php" class="btn btn-success">
-            <i class="fas fa-plus"></i> Thêm sản phẩm
+            <i class="fas fa-plus"></i> Thêm vật tư
         </a>
     </div>
 
@@ -517,7 +663,7 @@ if (!$list) {
             <?php while($row = mysqli_fetch_assoc($list)): ?>
                 <tr>
                     <td><?= $row['Masp'] ?></td>
-                    <td><?= $row['Tensp'] ?></td>
+                    <td class="chu"><?= $row['Tensp'] ?></td>
                     <td><span class="chip"><?= $row['Tendm'] ?></span></td>
                     <td><?= $row['Dvt'] ?></td>
                     <td><?= number_format($row['Giaban']) ?></td>

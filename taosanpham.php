@@ -33,6 +33,10 @@ if (isset($_POST['btnluu'])) {
         echo "<script>alert('Giá bán phải là số!');</script>";
     } else {
 
+      $check = mysqli_query($conn, "SELECT 1 FROM sanpham WHERE Tensp='$Tensp'");
+        if (mysqli_num_rows($check) > 0) {
+            echo "<script>alert('Tên sản phẩm đã tồn tại!');</script>";
+        } 
         // --- Check trùng mã ---
         $check = mysqli_query($conn, "SELECT 1 FROM sanpham WHERE Masp='$Masp'");
         if (mysqli_num_rows($check) > 0) {
