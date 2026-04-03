@@ -14,8 +14,8 @@ if (isset($_GET['xoa']) && !empty($_GET['xoa'])) {
     try {
         $pdo->beginTransaction();
         
-        // Lấy thông tin phiếu nhập để lấy Makh
-        $phieuXuat = $pdo->prepare("SELECT Makh FROM Phieuxuat WHERE Maxuathang = ?");
+        // Lấy thông tin phiếu xuất để lấy Mact
+        $phieuXuat = $pdo->prepare("SELECT Mact FROM Phieuxuat WHERE Maxuathang = ?");
         $phieuXuat->execute([$maxuat]);
         $phieuXuat = $phieuXuat->fetch();
 
@@ -53,7 +53,7 @@ foreach ($chiTietRows as $ct) {
         exit;
     } catch (Exception $e) {
         $pdo->rollBack();
-        header("Location: danh_sach_phieu_xoa.php?error=" . urlencode($e->getMessage()));
+        header("Location: danh_sach_phieu_xuat.php?error=" . urlencode($e->getMessage()));
         exit;
     }
 }
@@ -62,27 +62,27 @@ foreach ($chiTietRows as $ct) {
 // Bộ lọc tìm kiếm
 // =========================
 $maSearch   = trim($_GET['ma'] ?? '');      // Mã phiếu xuất
-$khSearch   = trim($_GET['makh'] ?? '');    // Mã khách hàng
+$ctSearch   = trim($_GET['mact'] ?? '');    // Mã công trình
 $spSearch   = trim($_GET['masp'] ?? '');    //  Mã sản phẩm (MỚI)
 $dateFrom  = trim($_GET['from'] ?? '');
 $dateTo    = trim($_GET['to'] ?? '');
 
 
-// Lấy danh sách Khách hàng cho dropdown lọc 
-$khachhangs = $pdo->query("
-    SELECT Makh, Tenkh 
-    FROM Khachhang 
-    ORDER BY Tenkh
+// Lấy danh sách Công trình cho dropdown lọc 
+$congtrinhs = $pdo->query("
+    SELECT Mact, Tenct 
+    FROM Congtrinh 
+    ORDER BY Tenct
 ")->fetchAll();
 
 // Xây dựng SQL với điều kiện lọc
 $sql = "
-SELECT DISTINCT px.*, kh.Tenkh,
+SELECT DISTINCT px.*, ct_join.Tenct,
     (SELECT COUNT(*)
      FROM Chitiet_Phieuxuat ct2
      WHERE ct2.Maxuathang = px.Maxuathang) AS SoMatHang
 FROM Phieuxuat px
-LEFT JOIN Khachhang kh ON px.Makh = kh.Makh
+LEFT JOIN Congtrinh ct_join ON px.Mact = ct_join.Mact
 LEFT JOIN Chitiet_Phieuxuat ct ON ct.Maxuathang = px.Maxuathang
 WHERE 1=1
 ";
@@ -100,10 +100,10 @@ if ($spSearch !== '') {
     $sql .= " AND ct.Masp LIKE :masp";
     $params[':masp'] = '%' . $spSearch . '%';
 }
-// Tìm theo khách hàng
-if ($khSearch !== '') {
-    $sql .= " AND px.Makh = :makh";
-    $params[':makh'] = $khSearch;
+// Tìm theo công trình
+if ($ctSearch !== '') {
+    $sql .= " AND px.Mact = :mact";
+    $params[':mact'] = $ctSearch;
 }
 
 // Từ ngày xuất
@@ -204,7 +204,7 @@ $error = $_GET['error'] ?? '';
     </style>
 </head>
 <body>
- <nav class="sidebar">
+<nav class="sidebar">
     <div class="text-center mb-4">
         <h4><i class="fas fa-warehouse"></i> Quản Lý Kho</h4>
     </div>
@@ -212,6 +212,18 @@ $error = $_GET['error'] ?? '';
         <li class="nav-item">
             <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
         </li>
+       
+         <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                <li class="nav-item"><a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-chart-line"></i> Báo cáo tiêu hao</a></li>
+                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-chart-pie"></i> Báo cáo tồn kho</a></li>
+            </ul>
+        </li>
+       
 
         <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
@@ -248,23 +260,12 @@ $error = $_GET['error'] ?? '';
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+            <a class="nav-link" href="javascript:void(0)" id="btnCongTrinh">
+                <i class="fas fa-briefcase"></i> Quản lý công trình
                 <i class="fas fa-chevron-down float-end"></i>
             </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao"> <!-- ĐÃ SỬA: thêm ul đúng id -->
-                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-warehouse"></i> Báo cáo tồn kho</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnKhachHang">
-                <i class="fas fa-users"></i> Quản lý khách hàng <!-- Đã sửa icon đúng -->
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuKhachHang">
-                <li class="nav-item"><a class="nav-link" href="khachhang.php"><i class="fas fa-user"></i> Khách hàng</a></li>
-                <li class="nav-item"><a class="nav-link" href="loaikhachhang.php"><i class="fas fa-users-cog"></i> Loại khách hàng</a></li>
+            <ul class="nav flex-column ms-3 d-none" id="submenuCongTrinh">
+                <li class="nav-item"><a class="nav-link" href="congtrinh.php"><i class="fas fa-folder-open"></i> Công trình</a></li>
             </ul>
         </li>
 
@@ -313,15 +314,15 @@ $error = $_GET['error'] ?? '';
              placeholder="Nhập mã phiếu xuất..." />
     </div>
 
-    <!-- Khách hàng -->
+    <!-- Công trình -->
     <div>
-      <label class="block text-black-300 mb-1">Khách hàng</label>
-      <select name="makh" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
+      <label class="block text-black-300 mb-1">Công trình</label>
+      <select name="mact" class="w-full px-3 py-2 rounded bg-white-900 border border-white-700">
         <option value="">-- Tất cả --</option>
-        <?php foreach ($khachhangs as $kh): ?>
-          <option value="<?= $kh['Makh'] ?>"
-            <?= ($khSearch === $kh['Makh']) ? 'selected' : '' ?>>
-            <?= htmlspecialchars($kh['Tenkh']) ?>
+        <?php foreach ($congtrinhs as $ct): ?>
+          <option value="<?= $ct['Mact'] ?>"
+            <?= ($ctSearch === $ct['Mact']) ? 'selected' : '' ?>>
+            <?= htmlspecialchars($ct['Tenct']) ?>
           </option>
         <?php endforeach; ?>
       </select>
@@ -372,7 +373,7 @@ $error = $_GET['error'] ?? '';
         <thead class="bg-black-900 text-black-300">
           <tr>
             <th class="px-4 py-3 text-left">Mã phiếu</th>
-            <th class="px-4 py-3 text-left">Khách hàng</th>
+            <th class="px-4 py-3 text-left">Công trình</th>
             <th class="px-4 py-3 text-left">Ngày xuất</th>
             <th class="px-4 py-3 text-right">Số mặt hàng</th>
             <th class="px-4 py-3 text-right">Tổng tiền</th>
@@ -387,7 +388,7 @@ $error = $_GET['error'] ?? '';
             <?php foreach ($phieuXuats as $px): ?>
               <tr class="border-t border-slate-800 hover:bg-slate-700/50">
                 <td class="px-4 py-2 font-semibold"><?= htmlspecialchars($px['Maxuathang']) ?></td>
-                <td class="px-4 py-2"><?= htmlspecialchars($px['Tenkh'] ?? 'N/A') ?></td>
+                <td class="px-4 py-2"><?= htmlspecialchars($px['Tenct'] ?? 'N/A') ?></td>
                 <td class="px-4 py-2"><?= date('d/m/Y', strtotime($px['Ngayxuat'])) ?></td>
                 <td class="px-4 py-2 text-right"><?= number_format($px['SoMatHang']) ?></td>
                 <td class="px-4 py-2 text-right font-semibold"><?= number_format($px['Tongtienxuat'], 0, ',', '.') ?> đ</td>
@@ -409,31 +410,40 @@ $error = $_GET['error'] ?? '';
     </div>
   </div>
   </div>
-  <script>
-document.getElementById("btnSanPham").addEventListener("click", function () {
-        document.getElementById("submenuSanPham").classList.toggle("d-none");
-    });
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Quản lý sidebar toggle submenu - Tối ưu và dễ bảo trì
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuItems = [
+            { btn: "btnBaoCao", submenu: "submenuBaoCao" },
+            { btn: "btnSanPham", submenu: "submenuSanPham" },
+            { btn: "btnPhieuNhap", submenu: "submenuPhieuNhap" },
+            { btn: "btnPhieuXuat", submenu: "submenuPhieuXuat" },
+            { btn: "btnCongTrinh", submenu: "submenuCongTrinh" }
+        ];
 
-    // Phiếu nhập kho
-    document.getElementById("btnPhieuNhap").addEventListener("click", function () {
-        document.getElementById("submenuPhieuNhap").classList.toggle("d-none");
+        menuItems.forEach(item => {
+            const button = document.getElementById(item.btn);
+            if (button) {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const submenu = document.getElementById(item.submenu);
+                    if (submenu) {
+                        submenu.classList.toggle("d-none");
+                        
+                        // Xoay icon chevron
+                        const icon = this.querySelector(".fa-chevron-down");
+                        if (icon) {
+                            icon.style.transform = submenu.classList.contains("d-none") 
+                                ? "rotate(0deg)" 
+                                : "rotate(180deg)";
+                            icon.style.transition = "transform 0.3s ease";
+                        }
+                    }
+                });
+            }
+        });
     });
-
-    // Phiếu xuất
-    document.getElementById("btnPhieuXuat").addEventListener("click", function () {
-        document.getElementById("submenuPhieuXuat").classList.toggle("d-none");
-    });
-
-    // Báo cáo & Thống kê (giờ hoạt động)
-    document.getElementById("btnBaoCao").addEventListener("click", function () {
-        document.getElementById("submenuBaoCao").classList.toggle("d-none");
-    });
-
-    // QUẢN LÝ KHÁCH HÀNG (đã thêm đầy đủ toggle)
-    document.getElementById("btnKhachHang").addEventListener("click", function () {
-        document.getElementById("submenuKhachHang").classList.toggle("d-none");
-    });
-
 </script>
 </body>
 </html>

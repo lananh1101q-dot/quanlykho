@@ -203,6 +203,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <li class="nav-item">
             <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
         </li>
+       
+         <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
+                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
+                <li class="nav-item"><a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-chart-line"></i> Báo cáo tiêu hao</a></li>
+                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-chart-pie"></i> Báo cáo tồn kho</a></li>
+            </ul>
+        </li>
+       
 
         <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnSanPham">
@@ -229,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnPhieuXuat">
-                <i class="fas fa-file-export"></i> Phiếu xuất
+                <i class="fas fa-file-export"></i> Phiếu xuất <!-- Đã sửa icon đúng -->
                 <i class="fas fa-chevron-down float-end"></i>
             </a>
             <ul class="nav flex-column ms-3 d-none" id="submenuPhieuXuat">
@@ -239,24 +251,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
-                <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
+            <a class="nav-link" href="javascript:void(0)" id="btnCongTrinh">
+                <i class="fas fa-briefcase"></i> Quản lý công trình
                 <i class="fas fa-chevron-down float-end"></i>
             </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
-                <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-warehouse"></i> Báo cáo tồn kho</a></li>
-                <li class="nav-item"><a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-chart-line"></i> Báo cáo tiêu hao</a></li>
-            </ul>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)" id="btnCongtrinh">
-                <i class="fas fa-building"></i> Quản lý công trình
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-            <ul class="nav flex-column ms-3 d-none" id="submenuCongtrinh">
-                <li class="nav-item"><a class="nav-link" href="congtrinh.php"><i class="fas fa-list"></i> Danh sách công trình</a></li>
-                <li class="nav-item"><a class="nav-link" href="them_congtrinh.php"><i class="fas fa-plus-circle"></i> Thêm công trình</a></li>
+            <ul class="nav flex-column ms-3 d-none" id="submenuCongTrinh">
+                <li class="nav-item"><a class="nav-link" href="congtrinh.php"><i class="fas fa-folder-open"></i> Công trình</a></li>
             </ul>
         </li>
 
@@ -264,209 +264,184 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a class="nav-link text-danger" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </li>
     </ul>
-  </nav>
+</nav>
 
   <div class="main-content">
-    <div class="card shadow">
-      <div class="card-header bg-primary text-white">
-        <h4 class="mb-0"><i class="fas fa-file-export me-2"></i>Tạo Phiếu Xuất Kho</h4>
-        <p class="mb-0 small">Ghi nhận hàng xuất ra công trình</p>
-      </div>
-      <div class="card-body">
-        <?php if ($errors): ?>
-          <div class="alert alert-danger">
-            <ul class="mb-0">
-              <?php foreach ($errors as $er): ?>
-                <li><?= htmlspecialchars($er) ?></li>
-              <?php endforeach; ?>
-            </ul>
-          </div>
-        <?php endif; ?>
-
-        <?php if ($success): ?>
-          <div class="alert alert-success">
-            ✅ <?= htmlspecialchars($success) ?>
-            <a href="danh_sach_phieu_xuat.php" class="btn btn-sm btn-primary mt-2">Xem danh sách</a>
-          </div>
-        <?php endif; ?>
-
-        <form method="post">
-          <div class="row mb-3">
-            <div class="col-md-3">
-              <label class="form-label">Mã xuất hàng *</label>
-              <input type="text" name="maxuathang" required class="form-control" 
-                     value="<?= htmlspecialchars($_POST['maxuathang'] ?? '') ?>" />
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Công Trình *</label>
-              <select name="mact" required class="form-select">
-                <option value="">-- Chọn công trình --</option>
-                <?php foreach ($congtrinhs as $ct): ?>
-                  <option value="<?= htmlspecialchars($ct['Mact']) ?>"
-                    <?= (($_POST['mact'] ?? '') === $ct['Mact']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($ct['Tenct']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Kho Xuất *</label>
-              <select name="makho" required class="form-select">
-                <option value="">-- Chọn kho --</option>
-                <?php foreach ($khos as $kho): ?>
-                  <option value="<?= htmlspecialchars($kho['Makho']) ?>"
-                    <?= (($_POST['makho'] ?? '') === $kho['Makho']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($kho['Tenkho']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Ngày xuất *</label>
-              <input type="date" name="ngayxuat" required class="form-control"
-                value="<?= htmlspecialchars($_POST['ngayxuat'] ?? date('Y-m-d')) ?>" />
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Ghi chú</label>
-            <textarea name="ghichu" rows="2" class="form-control"><?= htmlspecialchars($_POST['ghichu'] ?? '') ?></textarea>
-          </div>
-
-          <hr>
-          <h5 class="mb-3">Chi tiết sản phẩm</h5>
-
-          <div class="table-responsive mb-3">
-            <table class="table table-sm table-bordered">
-              <thead class="table-light">
-                <tr>
-                  <th>Sản phẩm</th>
-                  <th style="width: 120px;">Số lượng</th>
-                  <th style="width: 150px;">Đơn giá</th>
-                  <th style="width: 180px;">Thành tiền</th>
-                  <th style="width: 80px;">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody id="detail-rows">
-                <?php
-                $posted = isset($_POST['masp']) ? count($_POST['masp']) : 0;
-                $rowCount = max($posted, 1);
-                for ($i = 0; $i < $rowCount; $i++):
-                    $maspVal = $_POST['masp'][$i] ?? '';
-                    $slVal = $_POST['soluong'][$i] ?? '';
-                    $dgVal = $_POST['dongia'][$i] ?? '';
-                ?>
-                <tr>
-                  <td>
-                    <select name="masp[]" class="form-select form-select-sm">
-                      <option value="">-- Chọn --</option>
-                      <?php foreach ($sanphams as $sp): ?>
-                        <option value="<?= htmlspecialchars($sp['Masp']) ?>" 
-                                <?= ($maspVal === $sp['Masp']) ? 'selected' : '' ?>>
-                          <?= htmlspecialchars($sp['Tensp']) ?> (<?= htmlspecialchars($sp['Dvt']) ?>)
-                        </option>
-                      <?php endforeach; ?>
-                    </select>
-                  </td>
-                  <td><input name="soluong[]" type="number" min="1" step="0.01" class="form-control form-control-sm" 
-                             value="<?= htmlspecialchars($slVal) ?>" /></td>
-                  <td><input name="dongia[]" type="number" min="0" step="0.01" class="form-control form-control-sm" 
-                             value="<?= htmlspecialchars($dgVal) ?>" /></td>
-                  <td>
-                    <span class="badge bg-info">
-                      <?= number_format(($slVal ?? 0) * ($dgVal ?? 0), 2) ?>
-                    </span>
-                  </td>
-                  <td><button type="button" onclick="removeRow(this)" class="btn btn-sm btn-danger">
-                      <i class="fas fa-trash"></i>
-                    </button></td>
-                </tr>
-                <?php endfor; ?>
-              </tbody>
-            </table>
-          </div>
-
-          <button type="button" onclick="addRow()" class="btn btn-outline-primary btn-sm mb-3">
-            <i class="fas fa-plus me-2"></i>Thêm dòng
-          </button>
-
-          <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">
-              <i class="fas fa-save me-2"></i>Lưu phiếu xuất
-            </button>
-            <a href="danh_sach_phieu_xuat.php" class="btn btn-secondary">
-              <i class="fas fa-arrow-left me-2"></i>Quay lại
-            </a>
-          </div>
-        </form>
-      </div>
+    <div class="mb-4">
+        <h2>Tạo phiếu xuất kho</h2>
+        <p class="text-muted">Ghi nhận hàng xuất ra công trình</p>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const optionTemplate = <?php
-      $options = '';
-      foreach ($sanphams as $sp) {
-        $label = htmlspecialchars($sp['Tensp'] . ' (' . $sp['Dvt'] . ')', ENT_QUOTES);
-        $val = htmlspecialchars($sp['Masp'], ENT_QUOTES);
-        $options .= "<option value=\\\"{$val}\\\">{$label}</option>";
-      }
-      echo json_encode($options);
-    ?>;
+    <?php if ($errors): ?>
+      <div class="alert alert-danger">
+        <?php foreach ($errors as $e): ?>
+        <div>❌ <?= htmlspecialchars($e) ?></div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+s
+    <?php if ($success): ?>
+      <div class="alert alert-success">
+        ✅ <?= htmlspecialchars($success) ?>
+        <a href="danh_sach_phieu_xuat.php" class="btn btn-sm btn-primary mt-2">Xem danh sách</a>
+      </div>
+    <?php endif; ?>
 
-    function addRow() {
-      const tbody = document.getElementById('detail-rows');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>
-          <select name="masp[]" class="form-select form-select-sm">
-            <option value="">-- Chọn --</option>
-            ${optionTemplate}
-          </select>
-        </td>
-        <td><input name="soluong[]" type="number" min="1" step="0.01" class="form-control form-control-sm" /></td>
-        <td><input name="dongia[]" type="number" min="0" step="0.01" class="form-control form-control-sm" /></td>
-        <td>
-          <span class="badge bg-info">0.00</span>
-        </td>
-        <td><button type="button" onclick="removeRow(this)" class="btn btn-sm btn-danger">
-            <i class="fas fa-trash"></i>
-          </button></td>
-      `;
-      tbody.appendChild(tr);
-    }
+    <form method="post" class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Mã xuất hàng *</label>
+                    <input type="text" name="maxuathang" required class="form-control" 
+                           value="<?= htmlspecialchars($_POST['maxuathang'] ?? '') ?>" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Công Trình *</label>
+                    <select name="mact" required class="form-select">
+                        <option value="">-- Chọn công trình --</option>
+                        <?php foreach ($congtrinhs as $ct): ?>
+                        <option value="<?= htmlspecialchars($ct['Mact']) ?>"
+                                <?= (($_POST['mact'] ?? '') === $ct['Mact']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($ct['Tenct']) ?>
+                        </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kho Xuất *</label>
+                        <select name="makho" required class="form-select">
+                            <option value="">-- Chọn kho --</option>
+                            <?php foreach ($khos as $kho): ?>
+                            <option value="<?= htmlspecialchars($kho['Makho']) ?>"
+                                    <?= (($_POST['makho'] ?? '') === $kho['Makho']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($kho['Tenkho']) ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngày xuất *</label>
+                        <input type="date" name="ngayxuat" required class="form-control"
+                               value="<?= htmlspecialchars($_POST['ngayxuat'] ?? date('Y-m-d')) ?>" />
+                    </div>
+                </div>
 
-    function removeRow(btn) {
-      const tbody = btn.closest('tr').parentElement;
-      btn.closest('tr').remove();
-      if (tbody.children.length === 0) {
-        addRow();
-      }
-    }
+                <div class="mb-3">
+                    <label class="form-label">Ghi chú</label>
+                    <textarea name="ghichu" class="form-control" rows="2"><?= htmlspecialchars($_POST['ghichu'] ?? '') ?></textarea>
+                </div>
 
-    document.getElementById("btnSanPham").addEventListener("click", function () {
-      document.getElementById("submenuSanPham").classList.toggle("d-none");
+                <hr>
+                <h5 class="mb-3">Chi tiết sản phẩm</h5>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th style="width: 120px;">Số lượng</th>
+                                <th style="width: 150px;">Đơn giá xuất</th>
+                                <th style="width: 180px;">Thành tiền</th>
+                                <th style="width: 80px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-rows">
+                            <?php 
+                            $posted = isset($_POST['masp']) ? count($_POST['masp']) : 0;
+                            $rowCount = max($posted, 1);
+                            for ($i = 0; $i < $rowCount; $i++):
+                                $maspVal = $_POST['masp'][$i] ?? '';
+                                $slValStr = $_POST['soluong'][$i] ?? '';
+                                $dgValStr = $_POST['dongia'][$i] ?? '';
+                                $slVal = (float)$slValStr;
+                                $dgVal = (float)$dgValStr;
+                            ?>
+                            <tr>
+                                <td>
+                                    <select name="masp[]" required class="form-select form-select-sm">
+                                        <option value="">-- Chọn --</option>
+                                        <?php foreach ($sanphams as $sp): ?>
+                                        <option value="<?= htmlspecialchars($sp['Masp']) ?>"
+                                                <?= ($maspVal === $sp['Masp']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($sp['Tensp'] . ' (' . $sp['Dvt'] . ')') ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="soluong[]" min="1" step="0.01" required class="form-control form-control-sm"
+                                           value="<?= htmlspecialchars($slValStr) ?>" />
+                                </td>
+                                <td>
+                                    <input type="number" name="dongia[]" min="0" step="0.01" required class="form-control form-control-sm"
+                                           value="<?= htmlspecialchars($dgValStr) ?>" />
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <?= number_format($slVal * $dgVal, 2) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" onclick="removeRow(this)" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endfor; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="button" onclick="addRow()" class="btn btn-outline-primary btn-sm mb-3">
+                    <i class="fas fa-plus me-2"></i>Thêm sản phẩm
+                </button>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>Lưu phiếu xuất
+                    </button>
+                    <a href="danh_sach_phieu_xuat.php" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Quản lý sidebar toggle submenu - Tối ưu và dễ bảo trì
+    document.addEventListener("DOMContentLoaded", function () {
+        const menuItems = [
+            { btn: "btnBaoCao", submenu: "submenuBaoCao" },
+            { btn: "btnSanPham", submenu: "submenuSanPham" },
+            { btn: "btnPhieuNhap", submenu: "submenuPhieuNhap" },
+            { btn: "btnPhieuXuat", submenu: "submenuPhieuXuat" },
+            { btn: "btnCongTrinh", submenu: "submenuCongTrinh" }
+        ];
+
+        menuItems.forEach(item => {
+            const button = document.getElementById(item.btn);
+            if (button) {
+                button.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const submenu = document.getElementById(item.submenu);
+                    if (submenu) {
+                        submenu.classList.toggle("d-none");
+                        
+                        // Xoay icon chevron
+                        const icon = this.querySelector(".fa-chevron-down");
+                        if (icon) {
+                            icon.style.transform = submenu.classList.contains("d-none") 
+                                ? "rotate(0deg)" 
+                                : "rotate(180deg)";
+                            icon.style.transition = "transform 0.3s ease";
+                        }
+                    }
+                });
+            }
+        });
     });
-
-    document.getElementById("btnPhieuNhap").addEventListener("click", function () {
-      document.getElementById("submenuPhieuNhap").classList.toggle("d-none");
-    });
-
-    document.getElementById("btnPhieuXuat").addEventListener("click", function () {
-      document.getElementById("submenuPhieuXuat").classList.toggle("d-none");
-    });
-
-    document.getElementById("btnBaoCao").addEventListener("click", function () {
-      document.getElementById("submenuBaoCao").classList.toggle("d-none");
-    });
-
-    document.getElementById("btnCongtrinh").addEventListener("click", function () {
-      document.getElementById("submenuCongtrinh").classList.toggle("d-none");
-    });
-  </script>
+</script>
 </body>
 </html>
