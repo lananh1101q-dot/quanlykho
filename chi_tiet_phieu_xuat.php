@@ -14,9 +14,9 @@ if (empty($maxuathang)) {
 }
 
 $phieuXuat = $pdo->prepare("
-    SELECT px.*, kh.Tenkh, kh.Sdtkh, kh.Diachikh
+    SELECT px.*, kh.Tenct,  kh.Diachict
     FROM Phieuxuat px
-    LEFT JOIN Khachhang kh ON px.Makh = kh.Makh
+    LEFT JOIN Congtrinh kh ON px.Mact = kh.Mact
     WHERE px.Maxuathang = ?
 ");
 $phieuXuat->execute([$maxuathang]);
@@ -205,8 +205,8 @@ $chiTiet = $chiTiet->fetchAll();
           <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Maxuathang']) ?></div>
         </div>
         <div>
-          <label class="block text-sm text-black-400 mb-1">Mã khách hàng</label>
-          <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Makh']) ?></div>
+          <label class="block text-sm text-black-400 mb-1">Mã công trình</label>
+          <div class="text-lg font-semibold"><?= htmlspecialchars($phieuXuat['Mact']) ?></div>
         </div>
         <div>
           <label class="block text-sm text-black-400 mb-1">Ngày xuất</label>
