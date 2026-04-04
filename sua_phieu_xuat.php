@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a class="nav-link" href="trangchu.php"><i class="fas fa-home"></i> Trang Chủ</a>
         </li>
        
-         <li class="nav-item">
+        <li class="nav-item">
             <a class="nav-link" href="javascript:void(0)" id="btnBaoCao">
                 <i class="fas fa-chart-bar"></i> Báo cáo & Thống kê
                 <i class="fas fa-chevron-down float-end"></i>
@@ -145,6 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <ul class="nav flex-column ms-3 d-none" id="submenuBaoCao">
                 <li class="nav-item"><a class="nav-link" href="baocaotieuhao.php"><i class="fas fa-chart-line"></i> Báo cáo tiêu hao</a></li>
                 <li class="nav-item"><a class="nav-link" href="tonkho.php"><i class="fas fa-chart-pie"></i> Báo cáo tồn kho</a></li>
+                
+                <li class="nav-item"><a class="nav-link" href="thongke_biendong.php"><i class="fas fa-chart-area"></i> Biến động Nhập/Xuất</a></li>
+                
             </ul>
         </li>
        
